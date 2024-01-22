@@ -2,7 +2,8 @@ import React from 'react';
 import { HotTableProps, HotColumnProps } from './types';
 import {
   createEditorPortal,
-  getExtendedEditorElement,
+  getChildElementByType,
+  getExtendedEditorElement
 } from './helpers';
 import { SettingsMapper } from './settingsMapper';
 import Handsontable from 'handsontable/base';
@@ -52,7 +53,7 @@ class HotColumn extends React.Component<HotColumnProps, {}> {
    * Create the column settings based on the data provided to the `HotColumn` component and it's child components.
    */
   createColumnSettings(): void {
-    const rendererElement = this.context.getChildElementByType(this.props.children, 'hot-renderer');
+    const rendererElement = getChildElementByType(this.props.children, 'hot-renderer');
     const editorElement = this.getLocalEditorElement();
 
     this.columnSettings = SettingsMapper.getSettings(this.getSettingsProps()) as unknown as Handsontable.ColumnSettings;

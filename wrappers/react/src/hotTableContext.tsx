@@ -1,7 +1,6 @@
 import Handsontable from 'handsontable/base';
 import React, { PropsWithChildren, useCallback, useMemo, useRef } from 'react';
-import { getChildElementByType } from './helpers'
-import {HotEditorCache} from './types'
+import { HotEditorCache } from './types'
 
 interface HotTableContextImpl {
   /**
@@ -22,8 +21,6 @@ interface HotTableContextImpl {
    * @param {Number} columnIndex Column index.
    */
   readonly emitColumnSettings: (columnSettings: Handsontable.ColumnSettings, columnIndex: number) => void;
-
-  readonly getChildElementByType: (children: React.ReactNode, type: string) => React.ReactElement;
 
   /**
    * Editor cache.
@@ -48,7 +45,6 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
     componentRendererColumns: componentRendererColumns.current,
     columnsSettings: columnsSettings.current,
     emitColumnSettings: setHotColumnSettings,
-    getChildElementByType: getChildElementByType,
     editorCache: editorCache.current,
   }), [setHotColumnSettings]);
 
