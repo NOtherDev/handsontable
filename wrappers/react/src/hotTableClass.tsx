@@ -89,19 +89,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
   renderersPortalManager: RenderersPortalManager = null;
 
   /**
-   * Array containing the portals cashed to be rendered in bulk after Handsontable's render cycle.
-   */
-  portalCacheArray: React.ReactPortal[] = [];
-
-  /**
-   * The rendered cells cache.
-   *
-   * @private
-   * @type {Map}
-   */
-  private renderedCellCache: Map<string, HTMLTableCellElement> = new Map();
-
-  /**
    * Package version getter.
    *
    * @returns The version number of the package.
@@ -151,19 +138,10 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
   };
 
   /**
-   * Get the rendered table cell cache.
-   *
-   * @returns {Map}
-   */
-  getRenderedCellCache(): Map<string, HTMLTableCellElement> {
-    return this.renderedCellCache;
-  }
-
-  /**
    * Clear both the editor and the renderer cache.
    */
   clearCache(): void {
-    this.getRenderedCellCache().clear();
+    this.context.clearRenderedCellCache();
     this.context.componentRendererColumns.clear();
   }
 
@@ -187,49 +165,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    */
   private setHotElementRef(element: HTMLElement): void {
     this.hotElementRef = element;
-  }
-
-  /**
-   * Return a renderer wrapper function for the provided renderer component.
-   *
-   * @param {React.ReactElement} rendererElement React renderer component.
-   * @returns {Handsontable.renderers.Base} The Handsontable rendering function.
-   */
-  getRendererWrapper(rendererElement: React.ReactElement): typeof Handsontable.renderers.BaseRenderer | any {
-    const hotTableComponent = this;
-
-    return function (instance, TD, row, col, prop, value, cellProperties) {
-      const renderedCellCache = hotTableComponent.getRenderedCellCache();
-
-      if (renderedCellCache.has(`${row}-${col}`)) {
-        TD.innerHTML = renderedCellCache.get(`${row}-${col}`).innerHTML;
-      }
-
-      if (TD && !TD.getAttribute('ghost-table')) {
-
-        const {portal, portalContainer} = createPortal(rendererElement, {
-          TD,
-          row,
-          col,
-          prop,
-          value,
-          cellProperties,
-          isRenderer: true
-        }, TD.ownerDocument);
-
-        while (TD.firstChild) {
-          TD.removeChild(TD.firstChild);
-        }
-
-        TD.appendChild(portalContainer);
-
-        hotTableComponent.portalCacheArray.push(portal);
-      }
-
-      renderedCellCache.set(`${row}-${col}`, TD);
-
-      return TD;
-    };
   }
 
   /**
@@ -334,7 +269,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
     }
 
     if (globalRendererNode) {
-      newSettings.renderer = this.getRendererWrapper(globalRendererNode);
+      newSettings.renderer = this.context.getRendererWrapper(globalRendererNode);
       this.context.componentRendererColumns.set('global', true);
 
     } else {
@@ -367,7 +302,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    * Handsontable's `beforeViewRender` hook callback.
    */
   handsontableBeforeViewRender(): void {
-    this.getRenderedCellCache().clear();
+    this.context.clearRenderedCellCache();
   }
 
   /**
@@ -375,9 +310,9 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    */
   handsontableAfterViewRender(): void {
     this.renderersPortalManager.setState({
-      portals: [...this.portalCacheArray]
+      portals: [...this.context.portalCacheArray.current]
     }, () => {
-      this.portalCacheArray = [];
+      this.context.portalCacheArray.current = [];
     });
   }
 
@@ -460,7 +395,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
       .map((childNode, columnIndex) => {
         return React.cloneElement(childNode, {
           _columnIndex: columnIndex,
-          _getRendererWrapper: this.getRendererWrapper.bind(this),
           _getEditorClass: this.getEditorClass.bind(this),
           _getOwnerDocument: this.getOwnerDocument.bind(this),
           children: childNode.props.children

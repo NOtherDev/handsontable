@@ -43,7 +43,6 @@ export interface HotEditorProps {
  */
 export interface HotColumnProps extends Handsontable.ColumnSettings {
   _columnIndex?: number,
-  _getRendererWrapper?: (rendererNode: React.ReactElement) => typeof Handsontable.renderers.BaseRenderer;
   _getEditorClass?: (editorElement: React.ReactElement, editorColumnScope: EditorScopeIdentifier) => typeof Handsontable.editors.BaseEditor;
   _getOwnerDocument?: () => Document;
   children?: React.ReactNode;

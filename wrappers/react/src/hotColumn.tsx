@@ -26,8 +26,7 @@ class HotColumn extends React.Component<HotColumnProps, {}> {
    * @returns {Object}
    */
   getSettingsProps(): HotTableProps {
-    this.internalProps = ['_columnIndex', '_getRendererWrapper',
-      '_getEditorClass', '_getOwnerDocument', 'hot-renderer', 'hot-editor', 'children'];
+    this.internalProps = ['_columnIndex', '_getEditorClass', '_getOwnerDocument', 'hot-renderer', 'hot-editor', 'children'];
 
     return Object.keys(this.props)
       .filter(key => {
@@ -59,7 +58,7 @@ class HotColumn extends React.Component<HotColumnProps, {}> {
     this.columnSettings = SettingsMapper.getSettings(this.getSettingsProps()) as unknown as Handsontable.ColumnSettings;
 
     if (rendererElement !== null) {
-      this.columnSettings.renderer = this.props._getRendererWrapper(rendererElement);
+      this.columnSettings.renderer = this.context.getRendererWrapper(rendererElement);
       this.context.componentRendererColumns.set(this.props._columnIndex, true);
     }
 
