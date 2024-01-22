@@ -4,22 +4,15 @@ import { SettingsMapper } from './settingsMapper';
 import { RenderersPortalManager } from './renderersPortalManager';
 import { HotColumn } from './hotColumn';
 import * as packageJson from '../package.json';
-import {
-  HotTableProps,
-  HotEditorElement,
-  HotEditorCache,
-  EditorScopeIdentifier
-} from './types';
+import { HotTableProps, HotEditorElement } from './types';
 import {
   HOT_DESTROYED_WARNING,
   AUTOSIZE_WARNING,
   GLOBAL_EDITOR_SCOPE,
   createEditorPortal,
-  createPortal,
   getChildElementByType,
   getContainerAttributesProps,
   getExtendedEditorElement,
-  getOriginalEditorClass,
   isCSR,
   warn
 } from './helpers';
@@ -168,69 +161,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
   }
 
   /**
-   * Create a fresh class to be used as an editor, based on the provided editor React element.
-   *
-   * @param {React.ReactElement} editorElement React editor component.
-   * @param {string|number} [editorColumnScope] The editor scope (column index or a 'global' string). Defaults to
-   * 'global'.
-   * @returns {Function} A class to be passed to the Handsontable editor settings.
-   */
-  getEditorClass(editorElement: HotEditorElement, editorColumnScope: EditorScopeIdentifier = GLOBAL_EDITOR_SCOPE): typeof Handsontable.editors.BaseEditor {
-    const editorClass = getOriginalEditorClass(editorElement);
-    const cachedComponent = this.context.editorCache.get(editorClass)?.get(editorColumnScope);
-
-    return this.makeEditorClass(cachedComponent);
-  }
-
-  /**
-   * Create a class to be passed to the Handsontable's settings.
-   *
-   * @param {React.ReactElement} editorComponent React editor component.
-   * @returns {Function} A class to be passed to the Handsontable editor settings.
-   */
-  makeEditorClass(editorComponent: React.Component): typeof Handsontable.editors.BaseEditor {
-    const customEditorClass = class CustomEditor extends Handsontable.editors.BaseEditor implements Handsontable.editors.BaseEditor {
-      editorComponent: React.Component;
-
-      constructor(hotInstance) {
-        super(hotInstance);
-
-        (editorComponent as any).hotCustomEditorInstance = this;
-
-        this.editorComponent = editorComponent;
-      }
-
-      focus() {
-      }
-
-      getValue() {
-      }
-
-      setValue() {
-      }
-
-      open() {
-      }
-
-      close() {
-      }
-    } as any;
-
-    // Fill with the rest of the BaseEditor methods
-    Object.getOwnPropertyNames(Handsontable.editors.BaseEditor.prototype).forEach(propName => {
-      if (propName === 'constructor') {
-        return;
-      }
-
-      customEditorClass.prototype[propName] = function (...args) {
-        return editorComponent[propName].call(editorComponent, ...args);
-      }
-    });
-
-    return customEditorClass;
-  }
-
-  /**
    * Get the renderer element for the entire HotTable instance.
    *
    * @returns {React.ReactElement} React renderer component element.
@@ -262,7 +192,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
     newSettings.columns = this.context.columnsSettings.length ? this.context.columnsSettings : newSettings.columns;
 
     if (globalEditorNode) {
-      newSettings.editor = this.getEditorClass(globalEditorNode, GLOBAL_EDITOR_SCOPE);
+      newSettings.editor = this.context.getEditorClass(globalEditorNode, GLOBAL_EDITOR_SCOPE);
 
     } else {
       newSettings.editor = this.props.editor || undefined;
@@ -395,7 +325,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
       .map((childNode, columnIndex) => {
         return React.cloneElement(childNode, {
           _columnIndex: columnIndex,
-          _getEditorClass: this.getEditorClass.bind(this),
           _getOwnerDocument: this.getOwnerDocument.bind(this),
           children: childNode.props.children
         });

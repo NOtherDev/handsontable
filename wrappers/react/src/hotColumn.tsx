@@ -26,7 +26,7 @@ class HotColumn extends React.Component<HotColumnProps, {}> {
    * @returns {Object}
    */
   getSettingsProps(): HotTableProps {
-    this.internalProps = ['_columnIndex', '_getEditorClass', '_getOwnerDocument', 'hot-renderer', 'hot-editor', 'children'];
+    this.internalProps = ['_columnIndex', '_getOwnerDocument', 'hot-renderer', 'hot-editor', 'children'];
 
     return Object.keys(this.props)
       .filter(key => {
@@ -63,7 +63,7 @@ class HotColumn extends React.Component<HotColumnProps, {}> {
     }
 
     if (editorElement !== null) {
-      this.columnSettings.editor = this.props._getEditorClass(editorElement, this.props._columnIndex);
+      this.columnSettings.editor = this.context.getEditorClass(editorElement, this.props._columnIndex);
     }
   }
 
