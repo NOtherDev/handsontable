@@ -82,13 +82,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
   style: React.CSSProperties;
 
   /**
-   * Array of object containing the column settings.
-   *
-   * @type {Array}
-   */
-  columnSettings: Handsontable.ColumnSettings[] = [];
-
-  /**
    * Component used to manage the renderer portals.
    *
    * @type {React.Component}
@@ -107,14 +100,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    * @type {Map}
    */
   private renderedCellCache: Map<string, HTMLTableCellElement> = new Map();
-
-  /**
-   * Editor cache.
-   *
-   * @private
-   * @type {Map}
-   */
-  private editorCache: HotEditorCache = new Map();
 
   /**
    * Package version getter.
@@ -172,15 +157,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    */
   getRenderedCellCache(): Map<string, HTMLTableCellElement> {
     return this.renderedCellCache;
-  }
-
-  /**
-   * Get the editor cache and return it.
-   *
-   * @returns {Map}
-   */
-  getEditorCache(): HotEditorCache {
-    return this.editorCache;
   }
 
   /**
@@ -266,7 +242,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    */
   getEditorClass(editorElement: HotEditorElement, editorColumnScope: EditorScopeIdentifier = GLOBAL_EDITOR_SCOPE): typeof Handsontable.editors.BaseEditor {
     const editorClass = getOriginalEditorClass(editorElement);
-    const cachedComponent = this.getEditorCache().get(editorClass)?.get(editorColumnScope);
+    const cachedComponent = this.context.editorCache.get(editorClass)?.get(editorColumnScope);
 
     return this.makeEditorClass(cachedComponent);
   }
@@ -335,7 +311,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    * @returns {React.ReactElement} React editor component element.
    */
   getGlobalEditorElement(): HotEditorElement | null {
-    return getExtendedEditorElement(this.props.children, this.getEditorCache());
+    return getExtendedEditorElement(this.props.children, this.context.editorCache);
   }
 
   /**
@@ -348,7 +324,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
     const globalRendererNode = this.getGlobalRendererElement();
     const globalEditorNode = this.getGlobalEditorElement();
 
-    newSettings.columns = this.columnSettings.length ? this.columnSettings : newSettings.columns;
+    newSettings.columns = this.context.columnsSettings.length ? this.context.columnsSettings : newSettings.columns;
 
     if (globalEditorNode) {
       newSettings.editor = this.getEditorClass(globalEditorNode, GLOBAL_EDITOR_SCOPE);
@@ -385,16 +361,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
         warn(AUTOSIZE_WARNING);
       }
     }
-  }
-
-  /**
-   * Sets the column settings based on information received from HotColumn.
-   *
-   * @param {HotTableProps} columnSettings Column settings object.
-   * @param {Number} columnIndex Column index.
-   */
-  setHotColumnSettings(columnSettings: Handsontable.ColumnSettings, columnIndex: number): void {
-    this.columnSettings[columnIndex] = columnSettings;
   }
 
   /**
@@ -493,15 +459,12 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
       .filter(isHotColumn)
       .map((childNode, columnIndex) => {
         return React.cloneElement(childNode, {
-          _emitColumnSettings: this.setHotColumnSettings.bind(this),
           _columnIndex: columnIndex,
-          _getChildElementByType: getChildElementByType.bind(this),
           _getRendererWrapper: this.getRendererWrapper.bind(this),
           _getEditorClass: this.getEditorClass.bind(this),
           _getOwnerDocument: this.getOwnerDocument.bind(this),
-          _getEditorCache: this.getEditorCache.bind(this),
           children: childNode.props.children
-        } as object);
+        });
       });
 
     const containerProps = getContainerAttributesProps(this.props);
