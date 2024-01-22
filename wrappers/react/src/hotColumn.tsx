@@ -6,10 +6,18 @@ import {
 } from './helpers';
 import { SettingsMapper } from './settingsMapper';
 import Handsontable from 'handsontable/base';
+import { HotTableContext } from './hotTableContext';
 
 class HotColumn extends React.Component<HotColumnProps, {}> {
   internalProps: string[];
   columnSettings: Handsontable.ColumnSettings;
+
+  /**
+   * HotTableContext type assignment
+   */
+  static contextType = HotTableContext;
+
+  declare context: React.ContextType<typeof HotTableContext>;
 
   /**
    * Filter out all the internal properties and return an object with just the Handsontable-related props.
@@ -17,7 +25,7 @@ class HotColumn extends React.Component<HotColumnProps, {}> {
    * @returns {Object}
    */
   getSettingsProps(): HotTableProps {
-    this.internalProps = ['_componentRendererColumns', '_emitColumnSettings', '_columnIndex', '_getChildElementByType', '_getRendererWrapper',
+    this.internalProps = ['_emitColumnSettings', '_columnIndex', '_getChildElementByType', '_getRendererWrapper',
       '_getEditorClass', '_getEditorCache', '_getOwnerDocument', 'hot-renderer', 'hot-editor', 'children'];
 
     return Object.keys(this.props)
@@ -51,7 +59,7 @@ class HotColumn extends React.Component<HotColumnProps, {}> {
 
     if (rendererElement !== null) {
       this.columnSettings.renderer = this.props._getRendererWrapper(rendererElement);
-      this.props._componentRendererColumns.set(this.props._columnIndex, true);
+      this.context.componentRendererColumns.set(this.props._columnIndex, true);
     }
 
     if (editorElement !== null) {

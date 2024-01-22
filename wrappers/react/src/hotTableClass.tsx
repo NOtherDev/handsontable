@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import Handsontable from 'handsontable/base';
 import { SettingsMapper } from './settingsMapper';
 import { RenderersPortalManager } from './renderersPortalManager';
@@ -24,6 +24,7 @@ import {
   warn
 } from './helpers';
 import PropTypes from 'prop-types';
+import { HotTableContext } from './hotTableContext'
 
 /**
  * A Handsontable-ReactJS wrapper.
@@ -116,15 +117,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
   private editorCache: HotEditorCache = new Map();
 
   /**
-   * Map with column indexes (or a string = 'global') as keys, and booleans as values. Each key represents a component-based editor
-   * declared for the used column index, or a global one, if the key is the `global` string.
-   *
-   * @private
-   * @type {Map}
-   */
-  private componentRendererColumns: Map<number | string, boolean> = new Map();
-
-  /**
    * Package version getter.
    *
    * @returns The version number of the package.
@@ -132,6 +124,13 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
   static get version(): string {
     return (packageJson as any).version;
   }
+
+  /**
+   * HotTableContext type assignment
+   */
+  static contextType = HotTableContext;
+
+  declare context: React.ContextType<typeof HotTableContext>;
 
   /**
    * Getter for the property storing the Handsontable instance.
@@ -189,7 +188,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    */
   clearCache(): void {
     this.getRenderedCellCache().clear();
-    this.componentRendererColumns.clear();
+    this.context.componentRendererColumns.clear();
   }
 
   /**
@@ -360,7 +359,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
 
     if (globalRendererNode) {
       newSettings.renderer = this.getRendererWrapper(globalRendererNode);
-      this.componentRendererColumns.set('global', true);
+      this.context.componentRendererColumns.set('global', true);
 
     } else {
       newSettings.renderer = this.props.renderer || undefined;
@@ -382,7 +381,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
         this.hotInstance.getPlugin('autoColumnSize')?.enabled
       )
     ) {
-      if (this.componentRendererColumns.size > 0) {
+      if (this.context.componentRendererColumns.size > 0) {
         warn(AUTOSIZE_WARNING);
       }
     }
@@ -486,15 +485,14 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    * Render the component.
    */
   render(): React.ReactElement {
-    const isHotColumn = (childNode: any) => childNode.type === HotColumn;
+    const isHotColumn = (childNode: any): childNode is ReactElement => childNode.type === HotColumn;
     const children = React.Children.toArray(this.props.children);
 
     // clone the HotColumn nodes and extend them with the callbacks
     const hotColumnClones = children
-      .filter((childNode: any) => isHotColumn(childNode))
-      .map((childNode: React.ReactElement, columnIndex: number) => {
+      .filter(isHotColumn)
+      .map((childNode, columnIndex) => {
         return React.cloneElement(childNode, {
-          _componentRendererColumns: this.componentRendererColumns,
           _emitColumnSettings: this.setHotColumnSettings.bind(this),
           _columnIndex: columnIndex,
           _getChildElementByType: getChildElementByType.bind(this),
