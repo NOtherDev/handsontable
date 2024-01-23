@@ -4,7 +4,7 @@ import { EditorScopeIdentifier, HotEditorCache, HotEditorElement } from './types
 import { createPortal, getOriginalEditorClass, GLOBAL_EDITOR_SCOPE } from './helpers'
 import { RenderersPortalManager } from './renderersPortalManager'
 
-interface HotTableContextImpl {
+export interface HotTableContextImpl {
   /**
    * Map with column indexes (or a string = 'global') as keys, and booleans as values. Each key represents a component-based editor
    * declared for the used column index, or a global one, if the key is the `global` string.
