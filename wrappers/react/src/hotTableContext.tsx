@@ -9,7 +9,7 @@ interface HotTableContextImpl {
    * Map with column indexes (or a string = 'global') as keys, and booleans as values. Each key represents a component-based editor
    * declared for the used column index, or a global one, if the key is the `global` string.
    */
-  readonly componentRendererColumns: Map<number | 'global', boolean>;
+  readonly componentRendererColumns: Map<EditorScopeIdentifier, boolean>;
 
   /**
    * Array of object containing the column settings.
@@ -50,7 +50,7 @@ interface HotTableContextImpl {
    * 'global'.
    * @returns {Function} A class to be passed to the Handsontable editor settings.
    */
-  readonly getEditorClass: (editorElement: HotEditorElement, editorColumnScope?: EditorScopeIdentifier) => typeof Handsontable.editors.BaseEditor;
+  readonly getEditorClass: (editorElement: HotEditorElement, editorColumnScope?: EditorScopeIdentifier) => typeof Handsontable.editors.BaseEditor | undefined;
 
   /**
    * Set the renderers portal manager ref.
@@ -65,8 +65,7 @@ interface HotTableContextImpl {
   readonly pushCellPortalsIntoPortalManager: () => void;
 }
 
-const HotTableContext = React.createContext<HotTableContextImpl>(undefined);
-
+const HotTableContext = React.createContext<HotTableContextImpl | undefined>(undefined);
 
 /**
  * Create a class to be passed to the Handsontable's settings.
@@ -78,7 +77,7 @@ function makeEditorClass(editorComponent: React.Component): typeof Handsontable.
   const customEditorClass = class CustomEditor extends Handsontable.editors.BaseEditor implements Handsontable.editors.BaseEditor {
     editorComponent: React.Component;
 
-    constructor(hotInstance) {
+    constructor(hotInstance: Handsontable.Core) {
       super(hotInstance);
 
       (editorComponent as any).hotCustomEditorInstance = this;
@@ -108,8 +107,8 @@ function makeEditorClass(editorComponent: React.Component): typeof Handsontable.
       return;
     }
 
-    customEditorClass.prototype[propName] = function (...args) {
-      return editorComponent[propName].call(editorComponent, ...args);
+    (customEditorClass as any).prototype[propName] = function (...args: any[]) {
+      return (editorComponent as any)[propName].call(editorComponent, ...args);
     }
   });
 
@@ -132,7 +131,7 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const getRendererWrapper = useCallback((rendererElement: React.ReactElement): typeof Handsontable.renderers.BaseRenderer => {
     return function (instance, TD, row, col, prop, value, cellProperties) {
       if (renderedCellCache.current.has(`${row}-${col}`)) {
-        TD.innerHTML = renderedCellCache.current.get(`${row}-${col}`).innerHTML;
+        TD.innerHTML = renderedCellCache.current.get(`${row}-${col}`)!.innerHTML;
       }
 
       if (TD && !TD.getAttribute('ghost-table')) {
@@ -162,21 +161,23 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
     };
   }, []);
 
-  const getEditorClass = useCallback((editorElement: HotEditorElement, editorColumnScope: EditorScopeIdentifier = GLOBAL_EDITOR_SCOPE): typeof Handsontable.editors.BaseEditor => {
+  const getEditorClass = useCallback((editorElement: HotEditorElement, editorColumnScope: EditorScopeIdentifier = GLOBAL_EDITOR_SCOPE): typeof Handsontable.editors.BaseEditor | undefined => {
     const editorClass = getOriginalEditorClass(editorElement);
     const cachedComponent = editorCache.current.get(editorClass)?.get(editorColumnScope);
 
-    return makeEditorClass(cachedComponent);
+    if (cachedComponent) {
+      return makeEditorClass(cachedComponent);
+    }
   }, []);
 
-  const renderersPortalManager = useRef<RenderersPortalManager>(null);
+  const renderersPortalManager = useRef<RenderersPortalManager | null>(null);
 
   const setRenderersPortalManagerRef = useCallback((pmComponent: RenderersPortalManager) => {
     renderersPortalManager.current = pmComponent;
   }, []);
 
   const pushCellPortalsIntoPortalManager = useCallback(() => {
-    renderersPortalManager.current.setState({
+    renderersPortalManager.current!.setState({
       portals: [...portalCacheArray.current]
     }, () => {
       portalCacheArray.current = [];
