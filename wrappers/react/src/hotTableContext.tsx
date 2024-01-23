@@ -1,7 +1,8 @@
 import Handsontable from 'handsontable/base';
-import React, {MutableRefObject, PropsWithChildren, useCallback, useMemo, useRef } from 'react';
+import React, { PropsWithChildren, useCallback, useMemo, useRef } from 'react';
 import { EditorScopeIdentifier, HotEditorCache, HotEditorElement } from './types'
 import { createPortal, getOriginalEditorClass, GLOBAL_EDITOR_SCOPE } from './helpers'
+import { RenderersPortalManager } from './renderersPortalManager'
 
 interface HotTableContextImpl {
   /**
@@ -42,11 +43,6 @@ interface HotTableContextImpl {
   readonly clearRenderedCellCache: () => void;
 
   /**
-   * Array containing the portals cached to be rendered in bulk after Handsontable's render cycle.
-   */
-  readonly portalCacheArray: MutableRefObject<React.ReactPortal[]>;
-
-  /**
    * Create a fresh class to be used as an editor, based on the provided editor React element.
    *
    * @param {React.ReactElement} editorElement React editor component.
@@ -55,6 +51,18 @@ interface HotTableContextImpl {
    * @returns {Function} A class to be passed to the Handsontable editor settings.
    */
   readonly getEditorClass: (editorElement: HotEditorElement, editorColumnScope?: EditorScopeIdentifier) => typeof Handsontable.editors.BaseEditor;
+
+  /**
+   * Set the renderers portal manager ref.
+   *
+   * @param {React.ReactComponent} pmComponent The PortalManager component.
+   */
+  readonly setRenderersPortalManagerRef: (pmComponent: RenderersPortalManager) => void;
+
+  /**
+   * Puts cell portals into portal manager and purges portals cache.
+   */
+  readonly pushCellPortalsIntoPortalManager: () => void;
 }
 
 const HotTableContext = React.createContext<HotTableContextImpl>(undefined);
@@ -116,13 +124,9 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
   }, [])
 
   const componentRendererColumns = useRef<Map<number | 'global', boolean>>(new Map());
-
   const editorCache = useRef<HotEditorCache>(new Map());
-
   const renderedCellCache = useRef<Map<string, HTMLTableCellElement>>(new Map());
-
   const clearRenderedCellCache = useCallback(() => renderedCellCache.current.clear(), []);
-
   const portalCacheArray = useRef<React.ReactPortal[]>([]);
 
   const getRendererWrapper = useCallback((rendererElement: React.ReactElement): typeof Handsontable.renderers.BaseRenderer => {
@@ -165,6 +169,20 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
     return makeEditorClass(cachedComponent);
   }, []);
 
+  const renderersPortalManager = useRef<RenderersPortalManager>(null);
+
+  const setRenderersPortalManagerRef = useCallback((pmComponent: RenderersPortalManager) => {
+    renderersPortalManager.current = pmComponent;
+  }, []);
+
+  const pushCellPortalsIntoPortalManager = useCallback(() => {
+    renderersPortalManager.current.setState({
+      portals: [...portalCacheArray.current]
+    }, () => {
+      portalCacheArray.current = [];
+    });
+  }, []);
+
   const contextImpl: HotTableContextImpl = useMemo(() => ({
     componentRendererColumns: componentRendererColumns.current,
     columnsSettings: columnsSettings.current,
@@ -172,9 +190,10 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
     editorCache: editorCache.current,
     getRendererWrapper,
     clearRenderedCellCache,
-    portalCacheArray,
-    getEditorClass
-  }), [setHotColumnSettings]);
+    getEditorClass,
+    setRenderersPortalManagerRef,
+    pushCellPortalsIntoPortalManager
+  }), [setHotColumnSettings, getRendererWrapper, clearRenderedCellCache, getEditorClass, setRenderersPortalManagerRef]);
 
   return (
     <HotTableContext.Provider value={contextImpl}>{children}</HotTableContext.Provider>

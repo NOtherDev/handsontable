@@ -75,13 +75,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
   style: React.CSSProperties;
 
   /**
-   * Component used to manage the renderer portals.
-   *
-   * @type {React.Component}
-   */
-  renderersPortalManager: RenderersPortalManager = null;
-
-  /**
    * Package version getter.
    *
    * @returns The version number of the package.
@@ -239,11 +232,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    * Handsontable's `afterViewRender` hook callback.
    */
   handsontableAfterViewRender(): void {
-    this.renderersPortalManager.setState({
-      portals: [...this.context.portalCacheArray.current]
-    }, () => {
-      this.context.portalCacheArray.current = [];
-    });
+    this.context.pushCellPortalsIntoPortalManager();
   }
 
   /**
@@ -255,15 +244,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
     if (this.hotInstance) {
       this.hotInstance.updateSettings(newSettings, false);
     }
-  }
-
-  /**
-   * Set the renderers portal manager ref.
-   *
-   * @param {React.ReactComponent} pmComponent The PortalManager component.
-   */
-  private setRenderersPortalManagerRef(pmComponent: RenderersPortalManager): void {
-    this.renderersPortalManager = pmComponent;
   }
 
   /*
@@ -338,7 +318,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
         <div ref={this.setHotElementRef.bind(this)} {...containerProps}>
           {hotColumnClones}
         </div>
-        <RenderersPortalManager ref={this.setRenderersPortalManagerRef.bind(this)} />
+        <RenderersPortalManager ref={this.context.setRenderersPortalManagerRef} />
         {editorPortal}
       </React.Fragment>
     )
