@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { HotTableProps, HotColumnProps } from './types';
 import {
   createEditorPortal,
@@ -8,9 +8,17 @@ import {
 import { SettingsMapper } from './settingsMapper';
 import Handsontable from 'handsontable/base';
 import { HotTableContext } from './hotTableContext';
+import { useHotColumnContext } from './hotColumnContext'
 
-class HotColumn extends React.Component<HotColumnProps, {}> {
-  internalProps: string[];
+const isHotColumn = (childNode: any): childNode is ReactElement => childNode.type === HotColumn;
+
+const internalProps = ['_columnIndex', 'hot-renderer', 'hot-editor', 'children'];
+
+interface HotColumnInnerProps extends HotColumnProps {
+  _columnIndex: number;
+}
+
+class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
   columnSettings: Handsontable.ColumnSettings;
 
   /**
@@ -26,11 +34,9 @@ class HotColumn extends React.Component<HotColumnProps, {}> {
    * @returns {Object}
    */
   getSettingsProps(): HotTableProps {
-    this.internalProps = ['_columnIndex', '_getOwnerDocument', 'hot-renderer', 'hot-editor', 'children'];
-
     return Object.keys(this.props)
       .filter(key => {
-        return !this.internalProps.includes(key);
+        return !internalProps.includes(key);
       })
       .reduce((obj, key) => {
         obj[key] = this.props[key];
@@ -102,8 +108,7 @@ class HotColumn extends React.Component<HotColumnProps, {}> {
    * @returns {React.ReactElement}
    */
   render(): React.ReactElement {
-    const ownerDocument = this.props._getOwnerDocument();
-    const editorPortal = createEditorPortal(ownerDocument, this.getLocalEditorElement());
+    const editorPortal = createEditorPortal(this.props._getOwnerDocument(), this.getLocalEditorElement());
 
     return (
       <React.Fragment>
@@ -113,4 +118,9 @@ class HotColumn extends React.Component<HotColumnProps, {}> {
   }
 }
 
-export { HotColumn };
+const HotColumn: React.FC<HotColumnProps> = (props) => {
+  const { columnIndex, getOwnerDocument } = useHotColumnContext()
+  return <HotColumnInner {...props} _columnIndex={columnIndex} _getOwnerDocument={getOwnerDocument} />
+}
+
+export { HotColumn, isHotColumn };

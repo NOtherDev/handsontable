@@ -42,7 +42,5 @@ export interface HotEditorProps {
  * Properties related to the HotColumn architecture.
  */
 export interface HotColumnProps extends Handsontable.ColumnSettings {
-  _columnIndex?: number,
-  _getOwnerDocument?: () => Document;
   children?: React.ReactNode;
 }

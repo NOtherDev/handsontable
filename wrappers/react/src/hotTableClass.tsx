@@ -1,8 +1,7 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
 import Handsontable from 'handsontable/base';
 import { SettingsMapper } from './settingsMapper';
 import { RenderersPortalManager } from './renderersPortalManager';
-import { HotColumn } from './hotColumn';
 import * as packageJson from '../package.json';
 import { HotTableProps, HotEditorElement } from './types';
 import {
@@ -18,6 +17,8 @@ import {
 } from './helpers';
 import PropTypes from 'prop-types';
 import { HotTableContext } from './hotTableContext'
+import { isHotColumn } from './hotColumn'
+import { HotColumnContextProvider } from './hotColumnContext'
 
 /**
  * A Handsontable-ReactJS wrapper.
@@ -296,19 +297,15 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    * Render the component.
    */
   render(): React.ReactElement {
-    const isHotColumn = (childNode: any): childNode is ReactElement => childNode.type === HotColumn;
-    const children = React.Children.toArray(this.props.children);
-
-    // clone the HotColumn nodes and extend them with the callbacks
-    const hotColumnClones = children
+    const hotColumnWrapped = React.Children.toArray(this.props.children)
       .filter(isHotColumn)
-      .map((childNode, columnIndex) => {
-        return React.cloneElement(childNode, {
-          _columnIndex: columnIndex,
-          _getOwnerDocument: this.getOwnerDocument.bind(this),
-          children: childNode.props.children
-        });
-      });
+      .map((childNode, columnIndex) => (
+          <HotColumnContextProvider columnIndex={columnIndex}
+                                    getOwnerDocument={this.getOwnerDocument.bind(this)}
+                                    key={columnIndex}>
+            {childNode}
+          </HotColumnContextProvider>
+      ));
 
     const containerProps = getContainerAttributesProps(this.props);
     const editorPortal = createEditorPortal(this.getOwnerDocument(), this.getGlobalEditorElement());
@@ -316,7 +313,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
     return (
       <React.Fragment>
         <div ref={this.setHotElementRef.bind(this)} {...containerProps}>
-          {hotColumnClones}
+          {hotColumnWrapped}
         </div>
         <RenderersPortalManager ref={this.context.setRenderersPortalManagerRef} />
         {editorPortal}
