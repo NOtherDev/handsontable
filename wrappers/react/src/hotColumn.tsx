@@ -12,10 +12,11 @@ import { useHotColumnContext } from './hotColumnContext'
 
 const isHotColumn = (childNode: any): childNode is ReactElement => childNode.type === HotColumn;
 
-const internalProps = ['_columnIndex', 'hot-renderer', 'hot-editor', 'children'];
+const internalProps = ['_columnIndex', '_getOwnerDocument', 'hot-renderer', 'hot-editor', 'children'];
 
 interface HotColumnInnerProps extends HotColumnProps {
   _columnIndex: number;
+  _getOwnerDocument: () => Document | null;
 }
 
 class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
