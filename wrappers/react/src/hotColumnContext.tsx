@@ -21,7 +21,7 @@ const HotColumnContextProvider: React.FC<PropsWithChildren<HotColumnContextImpl>
   const contextImpl: HotColumnContextImpl = useMemo(() => ({
     columnIndex,
     getOwnerDocument
-  }), [columnIndex]);
+  }), [columnIndex, getOwnerDocument]);
 
   return (
     <HotColumnContext.Provider value={contextImpl}>{children}</HotColumnContext.Provider>
