@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { act } from '@testing-library/react';
 import { HotTable } from '../src/hotTable';
 import { BaseEditorComponent } from '../src/baseEditorComponent';
+import { RendererProps } from '../src/types'
 
 const SPEC = {
   container: null,
@@ -205,15 +206,11 @@ class IndividualPropsWrapper extends React.Component<{ref?: string, id?: string}
 
 export { IndividualPropsWrapper };
 
-export class RendererComponent extends React.Component<any, any> {
-  render(): React.ReactElement<string> {
-    return (
-      <>
-        value: {this.props.value}
-      </>
-    );
-  }
-}
+export const RendererComponent: React.FC<RendererProps> = ({ value }) => (
+    <>
+      value: {value}
+    </>
+)
 
 export class EditorComponent extends BaseEditorComponent<{}, {value?: any}> {
   mainElementRef: any;

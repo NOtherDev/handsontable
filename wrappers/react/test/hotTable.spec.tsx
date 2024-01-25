@@ -1,5 +1,7 @@
 import React from 'react';
 import { act } from '@testing-library/react';
+import Handsontable from 'handsontable';
+import { registerAllModules } from 'handsontable/registry';
 import {
   HotTable
 } from '../src/hotTable';
@@ -14,6 +16,10 @@ import {
   simulateMouseEvent,
   mountComponentWithRef
 } from './_helpers';
+import { OBSOLETE_HOTRENDERER_WARNING } from '../src/helpers'
+import { BaseRenderer } from 'handsontable/renderers';
+
+registerAllModules();
 
 describe('Handsontable initialization', () => {
   it('should render Handsontable when using the HotTable component', async () => {
@@ -109,7 +115,7 @@ describe('Updating the Handsontable settings', () => {
 });
 
 describe('Renderer configuration using React components', () => {
-  it('should use the renderer component as Handsontable renderer, when it\'s nested under HotTable and assigned the \'hot-renderer\' attribute', async () => {
+  it('should use the renderer component as Handsontable renderer, when it\'s passed as component to HotTable renderer prop', async () => {
     const hotInstance = mountComponentWithRef((
       <HotTable licenseKey="non-commercial-and-evaluation"
                 id="test-hot"
@@ -122,8 +128,8 @@ describe('Renderer configuration using React components', () => {
                 autoColumnSize={false}
                 init={function () {
                   mockElementDimensions(this.rootElement, 300, 300);
-                }}>
-        <RendererComponent hot-renderer></RendererComponent>
+                }}
+                renderer={RendererComponent}>
       </HotTable>
     )).hotInstance;
 
@@ -153,6 +159,128 @@ describe('Renderer configuration using React components', () => {
     await sleep(100);
 
     expect(hotInstance.getCell(99, 99).innerHTML).toEqual('<div>value: CV100</div>');
+  });
+
+  it('should use the renderer component as Handsontable renderer, when it\'s passed inline to HotTable renderer prop', async () => {
+    const hotInstance = mountComponentWithRef((
+      <HotTable licenseKey="non-commercial-and-evaluation"
+                id="test-hot"
+                data={createSpreadsheetData(100, 100)}
+                width={300}
+                height={300}
+                rowHeights={23}
+                colWidths={50}
+                autoRowSize={false}
+                autoColumnSize={false}
+                init={function () {
+                  mockElementDimensions(this.rootElement, 300, 300);
+                }}
+                renderer={(props) => <RendererComponent {...props} />}>
+      </HotTable>
+    )).hotInstance;
+
+    expect(hotInstance.getCell(0, 0).innerHTML).toEqual('<div>value: A1</div>');
+
+    await act(async() => {
+      hotInstance.scrollViewportTo({
+        row: 99,
+        col: 0,
+      });
+      // For some reason it needs another render
+      hotInstance.render();
+    });
+
+    await sleep(100);
+
+    expect(hotInstance.getCell(99, 1).innerHTML).toEqual('<div>value: B100</div>');
+
+    await act(async() => {
+      hotInstance.scrollViewportTo({
+        row: 99,
+        col: 99,
+      });
+      hotInstance.render();
+    });
+
+    await sleep(100);
+
+    expect(hotInstance.getCell(99, 99).innerHTML).toEqual('<div>value: CV100</div>');
+  });
+
+  it('should use the renderer function as native Handsontable renderer, when it\'s passed to HotTable hotRerender prop', async () => {
+    const customNativeRenderer: BaseRenderer = function ( instance, td, row, col, prop, value, cellProperties) {
+      Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, `value: ${value}`, cellProperties]);
+      return td;
+    }
+
+    const hotInstance = mountComponentWithRef((
+      <HotTable licenseKey="non-commercial-and-evaluation"
+                id="test-hot"
+                data={createSpreadsheetData(100, 100)}
+                width={300}
+                height={300}
+                rowHeights={23}
+                colWidths={50}
+                autoRowSize={false}
+                autoColumnSize={false}
+                init={function () {
+                  mockElementDimensions(this.rootElement, 300, 300);
+                }}
+                hotRenderer={customNativeRenderer}>
+      </HotTable>
+    )).hotInstance;
+
+    expect(hotInstance.getCell(0, 0).innerHTML).toEqual('value: A1');
+
+    await act(async() => {
+      hotInstance.scrollViewportTo({
+        row: 99,
+        col: 0,
+      });
+      // For some reason it needs another render
+      hotInstance.render();
+    });
+
+    await sleep(100);
+
+    expect(hotInstance.getCell(99, 1).innerHTML).toEqual('value: B100');
+
+    await act(async() => {
+      hotInstance.scrollViewportTo({
+        row: 99,
+        col: 99,
+      });
+      hotInstance.render();
+    });
+
+    await sleep(100);
+
+    expect(hotInstance.getCell(99, 99).innerHTML).toEqual('value: CV100');
+  });
+
+  it('should issue a warning when the renderer component is nested under HotTable and assigned the \'hot-renderer\' attribute', async () => {
+    console.warn = jasmine.createSpy('warn');
+
+    const hotInstance = mountComponentWithRef((
+      <HotTable licenseKey="non-commercial-and-evaluation"
+                id="test-hot"
+                data={createSpreadsheetData(100, 100)}
+                width={300}
+                height={300}
+                rowHeights={23}
+                colWidths={50}
+                autoRowSize={false}
+                autoColumnSize={false}
+                init={function () {
+                  mockElementDimensions(this.rootElement, 300, 300);
+                }}>
+        <RendererComponent hot-renderer></RendererComponent>
+      </HotTable>
+    )).hotInstance;
+
+    expect(hotInstance.getCell(0, 0).innerHTML).not.toEqual('<div>value: A1</div>');
+
+    expect(console.warn).toHaveBeenCalledWith(OBSOLETE_HOTRENDERER_WARNING);
   });
 });
 

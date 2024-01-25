@@ -15,6 +15,12 @@ export const AUTOSIZE_WARNING = 'Your `HotTable` configuration includes `autoRow
   ' the component-based renderers`. Disable `autoRowSize` and `autoColumnSize` to prevent row and column misalignment.';
 
 /**
+ * Warning message for the `hot-renderer` obsolete renderer passing method.
+ */
+export const OBSOLETE_HOTRENDERER_WARNING = 'Providing a component-based renderer using `hot-renderer`-annotated component is no longer supported. ' +
+  'Pass your component using `renderer` prop of the `HotTable` or `HotColumn` component instead.';
+
+/**
  * Message for the warning thrown if the Handsontable instance has been destroyed.
  */
 export const HOT_DESTROYED_WARNING = 'The Handsontable instance bound to this component was destroyed and cannot be' +
@@ -166,6 +172,28 @@ export function createPortal(rElement: React.ReactElement, props, ownerDocument:
 
   return {
     portal: ReactDOM.createPortal(extendedRendererElement, portalContainer, `${props.row}-${props.col}-${Math.random()}`),
+    portalContainer
+  };
+}
+
+// TODO(3-hotrenderer-hoteditor)
+export function createPortal2(rElement: React.ReactElement, key: string, ownerDocument: Document = document): {
+  portal: React.ReactPortal,
+  portalContainer: HTMLElement
+} {
+  if (!ownerDocument) {
+    ownerDocument = document;
+  }
+
+  if (!bulkComponentContainer) {
+    bulkComponentContainer = ownerDocument.createDocumentFragment();
+  }
+
+  const portalContainer = ownerDocument.createElement('DIV');
+  bulkComponentContainer.appendChild(portalContainer);
+
+  return {
+    portal: ReactDOM.createPortal(rElement, portalContainer, key),
     portalContainer
   };
 }

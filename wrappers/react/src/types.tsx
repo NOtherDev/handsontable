@@ -18,10 +18,32 @@ export type EditorScopeIdentifier = 'global' | number;
 export type HotEditorCache = Map<Function, Map<EditorScopeIdentifier, React.Component>>;
 
 /**
+ * Renderer props type
+ */
+export interface RendererProps {
+  instance: Handsontable.Core,
+  td: HTMLTableCellElement,
+  row: number,
+  column: number,
+  prop: string | number,
+  value: any,
+  cellProperties: Handsontable.CellProperties
+}
+
+/**
+ * Helper type to expose GridSettings/ColumnSettings props with native rerenders/editors separately
+ *  from component-based render prop.
+ */
+type ReplaceRenderersEditors<T extends Handsontable.GridSettings> = Omit<T, 'renderer'> & {
+  hotRenderer?: T['renderer'],
+  renderer?: React.ComponentType<RendererProps>,
+}
+
+/**
  * Interface for the `prop` of the HotTable component - extending the default Handsontable settings with additional,
  * component-related properties.
  */
-export interface HotTableProps extends Handsontable.GridSettings {
+export interface HotTableProps extends ReplaceRenderersEditors<Handsontable.GridSettings> {
   id?: string,
   className?: string,
   style?: React.CSSProperties,

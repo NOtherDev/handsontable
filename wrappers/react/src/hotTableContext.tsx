@@ -1,7 +1,7 @@
 import Handsontable from 'handsontable/base';
 import React, { PropsWithChildren, useCallback, useMemo, useRef } from 'react';
-import { EditorScopeIdentifier, HotEditorCache, HotEditorElement } from './types'
-import { createPortal, getOriginalEditorClass, GLOBAL_EDITOR_SCOPE } from './helpers'
+import { EditorScopeIdentifier, HotEditorCache, HotEditorElement, RendererProps } from './types'
+import { createPortal, createPortal2, getOriginalEditorClass, GLOBAL_EDITOR_SCOPE } from './helpers'
 import { RenderersPortalManager } from './renderersPortalManager'
 
 export interface HotTableContextImpl {
@@ -36,6 +36,7 @@ export interface HotTableContextImpl {
    * @returns {Handsontable.renderers.Base} The Handsontable rendering function.
    */
   readonly getRendererWrapper: (rendererNode: React.ReactElement) => typeof Handsontable.renderers.BaseRenderer;
+  readonly getRendererWrapper2: (renderer: React.ComponentType<RendererProps>) => typeof Handsontable.renderers.BaseRenderer;
 
   /**
    * Clears rendered cells cache.
@@ -161,6 +162,42 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
     };
   }, []);
 
+  // TODO(3-hotrenderer-hoteditor
+  const getRendererWrapper2 = useCallback((Renderer: React.ComponentType<RendererProps>): typeof Handsontable.renderers.BaseRenderer => {
+    return function (instance, td, row, column, prop, value, cellProperties) {
+      const rowColKey = `${row}-${column}`
+      if (renderedCellCache.current.has(rowColKey)) {
+        td.innerHTML = renderedCellCache.current.get(rowColKey)!.innerHTML;
+      }
+
+      if (td && !td.getAttribute('ghost-table')) {
+        const rendererElement = (
+            <Renderer instance={instance}
+                      td={td}
+                      row={row}
+                      column={column}
+                      prop={prop}
+                      value={value}
+                      cellProperties={cellProperties}/>
+        );
+
+        const {portal, portalContainer} = createPortal2(rendererElement, `${rowColKey}-${Math.random()}`, td.ownerDocument);
+
+        while (td.firstChild) {
+          td.removeChild(td.firstChild);
+        }
+
+        td.appendChild(portalContainer);
+
+        portalCacheArray.current.push(portal);
+      }
+
+      renderedCellCache.current.set(rowColKey, td);
+
+      return td;
+    };
+  }, []);
+
   const getEditorClass = useCallback((editorElement: HotEditorElement, editorColumnScope: EditorScopeIdentifier = GLOBAL_EDITOR_SCOPE): typeof Handsontable.editors.BaseEditor | undefined => {
     const editorClass = getOriginalEditorClass(editorElement);
     const cachedComponent = editorCache.current.get(editorClass)?.get(editorColumnScope);
@@ -190,6 +227,7 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
     emitColumnSettings: setHotColumnSettings,
     editorCache: editorCache.current,
     getRendererWrapper,
+    getRendererWrapper2,
     clearRenderedCellCache,
     getEditorClass,
     setRenderersPortalManagerRef,
