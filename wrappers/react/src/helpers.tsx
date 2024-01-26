@@ -51,10 +51,10 @@ export function warn(...args) {
  * Filter out and return elements of the provided `type` from the `HotColumn` component's children.
  *
  * @param {React.ReactNode} children HotTable children array.
- * @param {String} type Either `'hot-renderer'` or `'hot-editor'`.
+ * @param {String} type `'hot-editor'`.
  * @returns {Object|null} A child (React node) or `null`, if no child of that type was found.
  */
-export function getChildElementByType(children: React.ReactNode, type: string): React.ReactElement | null {
+export function getChildElementByType(children: React.ReactNode, type: 'hot-editor'): React.ReactElement | null {
   const childrenArray: React.ReactNode[] = React.Children.toArray(children);
   const childrenCount: number = React.Children.count(children);
   let wantedChild: React.ReactNode | null = null;
@@ -143,41 +143,14 @@ export function getExtendedEditorElement(children: React.ReactNode, editorCache:
 }
 
 /**
- * Create a react component and render it to an external DOM done.
+ * Render a cell component to an external DOM node.
  *
  * @param {React.ReactElement} rElement React element to be used as a base for the component.
- * @param {Object} props Props to be passed to the cloned element.
+ * @param {Object} key Unique identifier of the cell element.
  * @param {Document} [ownerDocument] The owner document to set the portal up into.
  * @returns {{portal: React.ReactPortal, portalContainer: HTMLElement}} An object containing the portal and its container.
  */
-export function createPortal(rElement: React.ReactElement, props, ownerDocument: Document = document): {
-  portal: React.ReactPortal,
-  portalContainer: HTMLElement
-} {
-  if (!ownerDocument) {
-    ownerDocument = document;
-  }
-
-  if (!bulkComponentContainer) {
-    bulkComponentContainer = ownerDocument.createDocumentFragment();
-  }
-
-  const portalContainer = ownerDocument.createElement('DIV');
-  bulkComponentContainer.appendChild(portalContainer);
-
-  const extendedRendererElement = React.cloneElement(rElement, {
-    key: `${props.row}-${props.col}`,
-    ...props
-  });
-
-  return {
-    portal: ReactDOM.createPortal(extendedRendererElement, portalContainer, `${props.row}-${props.col}-${Math.random()}`),
-    portalContainer
-  };
-}
-
-// TODO(3-hotrenderer-hoteditor)
-export function createPortal2(rElement: React.ReactElement, key: string, ownerDocument: Document = document): {
+export function createPortal(rElement: React.ReactElement, key: string, ownerDocument: Document = document): {
   portal: React.ReactPortal,
   portalContainer: HTMLElement
 } {

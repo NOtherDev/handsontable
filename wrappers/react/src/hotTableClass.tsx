@@ -9,7 +9,6 @@ import {
   AUTOSIZE_WARNING,
   GLOBAL_EDITOR_SCOPE,
   createEditorPortal,
-  getChildElementByType,
   getContainerAttributesProps,
   getExtendedEditorElement,
   isCSR,
@@ -155,15 +154,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
   }
 
   /**
-   * Get the renderer element for the entire HotTable instance.
-   *
-   * @returns {React.ReactElement} React renderer component element.
-   */
-  getGlobalRendererElement(): React.ReactElement {
-    return getChildElementByType(this.props.children, 'hot-renderer');
-  }
-
-  /**
    * Get the editor element for the entire HotTable instance.
    *
    * @param {React.ReactNode} [children] Children of the HotTable instance. Defaults to `this.props.children`.
@@ -180,7 +170,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    */
   createNewGlobalSettings(): Handsontable.GridSettings {
     const newSettings = SettingsMapper.getSettings(this.props);
-    const globalRendererNode = this.getGlobalRendererElement();
     const globalEditorNode = this.getGlobalEditorElement();
 
     newSettings.columns = this.context.columnsSettings.length ? this.context.columnsSettings : newSettings.columns;
@@ -193,7 +182,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
     }
 
     if (this.props.renderer) {
-      newSettings.renderer = this.context.getRendererWrapper2(this.props.renderer);
+      newSettings.renderer = this.context.getRendererWrapper(this.props.renderer);
       this.context.componentRendererColumns.set('global', true);
     } else {
       newSettings.renderer = this.props.hotRenderer || undefined;

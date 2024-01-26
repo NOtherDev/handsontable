@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { createRoot } from 'react-dom/client';
+import Handsontable from 'handsontable';
 import { act } from '@testing-library/react';
 import { HotTable } from '../src/hotTable';
 import { BaseEditorComponent } from '../src/baseEditorComponent';
@@ -211,6 +212,11 @@ export const RendererComponent: React.FC<RendererProps> = ({ value }) => (
       value: {value}
     </>
 )
+
+export const customNativeRenderer: Handsontable.renderers.BaseRenderer = function ( instance, td, row, col, prop, value, cellProperties) {
+  Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, `value: ${value}`, cellProperties]);
+  return td;
+}
 
 export class EditorComponent extends BaseEditorComponent<{}, {value?: any}> {
   mainElementRef: any;

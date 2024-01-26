@@ -1,7 +1,7 @@
 import Handsontable from 'handsontable/base';
 import React, { PropsWithChildren, useCallback, useMemo, useRef } from 'react';
 import { EditorScopeIdentifier, HotEditorCache, HotEditorElement, RendererProps } from './types'
-import { createPortal, createPortal2, getOriginalEditorClass, GLOBAL_EDITOR_SCOPE } from './helpers'
+import { createPortal, getOriginalEditorClass, GLOBAL_EDITOR_SCOPE } from './helpers'
 import { RenderersPortalManager } from './renderersPortalManager'
 
 export interface HotTableContextImpl {
@@ -32,11 +32,10 @@ export interface HotTableContextImpl {
   /**
    * Return a renderer wrapper function for the provided renderer component.
    *
-   * @param {React.ReactElement} rendererElement React renderer component.
+   * @param {React.ComponentType<RendererProps>} Renderer React renderer component.
    * @returns {Handsontable.renderers.Base} The Handsontable rendering function.
    */
-  readonly getRendererWrapper: (rendererNode: React.ReactElement) => typeof Handsontable.renderers.BaseRenderer;
-  readonly getRendererWrapper2: (renderer: React.ComponentType<RendererProps>) => typeof Handsontable.renderers.BaseRenderer;
+  readonly getRendererWrapper: (Renderer: React.ComponentType<RendererProps>) => typeof Handsontable.renderers.BaseRenderer;
 
   /**
    * Clears rendered cells cache.
@@ -129,41 +128,7 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const clearRenderedCellCache = useCallback(() => renderedCellCache.current.clear(), []);
   const portalCacheArray = useRef<React.ReactPortal[]>([]);
 
-  const getRendererWrapper = useCallback((rendererElement: React.ReactElement): typeof Handsontable.renderers.BaseRenderer => {
-    return function (instance, TD, row, col, prop, value, cellProperties) {
-      if (renderedCellCache.current.has(`${row}-${col}`)) {
-        TD.innerHTML = renderedCellCache.current.get(`${row}-${col}`)!.innerHTML;
-      }
-
-      if (TD && !TD.getAttribute('ghost-table')) {
-
-        const {portal, portalContainer} = createPortal(rendererElement, {
-          TD,
-          row,
-          col,
-          prop,
-          value,
-          cellProperties,
-          isRenderer: true
-        }, TD.ownerDocument);
-
-        while (TD.firstChild) {
-          TD.removeChild(TD.firstChild);
-        }
-
-        TD.appendChild(portalContainer);
-
-        portalCacheArray.current.push(portal);
-      }
-
-      renderedCellCache.current.set(`${row}-${col}`, TD);
-
-      return TD;
-    };
-  }, []);
-
-  // TODO(3-hotrenderer-hoteditor
-  const getRendererWrapper2 = useCallback((Renderer: React.ComponentType<RendererProps>): typeof Handsontable.renderers.BaseRenderer => {
+  const getRendererWrapper = useCallback((Renderer: React.ComponentType<RendererProps>): typeof Handsontable.renderers.BaseRenderer => {
     return function (instance, td, row, column, prop, value, cellProperties) {
       const rowColKey = `${row}-${column}`
       if (renderedCellCache.current.has(rowColKey)) {
@@ -181,7 +146,7 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
                       cellProperties={cellProperties}/>
         );
 
-        const {portal, portalContainer} = createPortal2(rendererElement, `${rowColKey}-${Math.random()}`, td.ownerDocument);
+        const {portal, portalContainer} = createPortal(rendererElement, `${rowColKey}-${Math.random()}`, td.ownerDocument);
 
         while (td.firstChild) {
           td.removeChild(td.firstChild);
@@ -227,7 +192,6 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
     emitColumnSettings: setHotColumnSettings,
     editorCache: editorCache.current,
     getRendererWrapper,
-    getRendererWrapper2,
     clearRenderedCellCache,
     getEditorClass,
     setRenderersPortalManagerRef,

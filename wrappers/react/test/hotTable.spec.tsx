@@ -1,6 +1,5 @@
 import React from 'react';
 import { act } from '@testing-library/react';
-import Handsontable from 'handsontable';
 import { registerAllModules } from 'handsontable/registry';
 import {
   HotTable
@@ -14,11 +13,12 @@ import {
   sleep,
   simulateKeyboardEvent,
   simulateMouseEvent,
-  mountComponentWithRef
+  mountComponentWithRef,
+  customNativeRenderer
 } from './_helpers';
 import { OBSOLETE_HOTRENDERER_WARNING } from '../src/helpers'
-import { BaseRenderer } from 'handsontable/renderers';
 
+// register Handsontable's modules
 registerAllModules();
 
 describe('Handsontable initialization', () => {
@@ -207,12 +207,7 @@ describe('Renderer configuration using React components', () => {
     expect(hotInstance.getCell(99, 99).innerHTML).toEqual('<div>value: CV100</div>');
   });
 
-  it('should use the renderer function as native Handsontable renderer, when it\'s passed to HotTable hotRerender prop', async () => {
-    const customNativeRenderer: BaseRenderer = function ( instance, td, row, col, prop, value, cellProperties) {
-      Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, `value: ${value}`, cellProperties]);
-      return td;
-    }
-
+  it('should use the renderer function as native Handsontable renderer, when it\'s passed to HotTable hotRenderer prop', async () => {
     const hotInstance = mountComponentWithRef((
       <HotTable licenseKey="non-commercial-and-evaluation"
                 id="test-hot"
