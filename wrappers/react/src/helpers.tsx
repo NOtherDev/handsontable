@@ -51,10 +51,10 @@ export function warn(...args) {
  * Filter out and return elements of the provided `type` from the `HotColumn` component's children.
  *
  * @param {React.ReactNode} children HotTable children array.
- * @param {String} type `'hot-editor'`.
+ * @param {String} type `'hot-renderer'` or `'hot-editor'`.
  * @returns {Object|null} A child (React node) or `null`, if no child of that type was found.
  */
-export function getChildElementByType(children: React.ReactNode, type: 'hot-editor'): React.ReactElement | null {
+export function getChildElementByType(children: React.ReactNode, type: 'hot-renderer' | 'hot-editor'): React.ReactElement | null {
   const childrenArray: React.ReactNode[] = React.Children.toArray(children);
   const childrenCount: number = React.Children.count(children);
   let wantedChild: React.ReactNode | null = null;
