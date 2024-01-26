@@ -1,17 +1,13 @@
 import React from 'react';
-import {
-  HotTable
-} from '../src/hotTable';
-import {
-  HotColumn
-} from '../src/hotColumn';
+import { HotTable } from '../src/hotTable';
+import { HotColumn } from '../src/hotColumn';
 import {
   createSpreadsheetData,
   mockElementDimensions,
   mountComponentWithRef
 } from './_helpers';
 import { BaseEditorComponent } from '../src/baseEditorComponent';
-import {RendererProps} from '../src'
+import { RendererProps } from '../src'
 
 describe('React Context', () => {
   it('should be possible to declare a context and use it inside both renderers and editors', async () => {

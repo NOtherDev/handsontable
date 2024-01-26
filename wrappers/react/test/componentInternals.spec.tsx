@@ -10,7 +10,7 @@ import {
 } from './_helpers';
 import { HOT_DESTROYED_WARNING } from "../src/helpers";
 import { BaseEditorComponent } from '../src/baseEditorComponent';
-import {RendererProps} from '../src'
+import { RendererProps } from '../src'
 
 describe('Subcomponent state', () => {
   it('should be possible to set the state of the renderer components passed to HotTable and HotColumn', async () => {

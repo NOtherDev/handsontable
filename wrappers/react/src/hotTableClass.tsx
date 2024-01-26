@@ -12,7 +12,9 @@ import {
   getContainerAttributesProps,
   getExtendedEditorElement,
   isCSR,
-  warn, getChildElementByType, OBSOLETE_HOTRENDERER_WARNING
+  warn,
+  getChildElementByType,
+  OBSOLETE_HOTRENDERER_WARNING
 } from './helpers';
 import PropTypes from 'prop-types';
 import { HotTableContext } from './hotTableContext'
