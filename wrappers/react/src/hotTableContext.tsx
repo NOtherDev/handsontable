@@ -129,8 +129,8 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const portalCacheArray = useRef<React.ReactPortal[]>([]);
 
   const getRendererWrapper = useCallback((Renderer: React.ComponentType<RendererProps>): typeof Handsontable.renderers.BaseRenderer => {
-    return function (instance, td, row, column, prop, value, cellProperties) {
-      const rowColKey = `${row}-${column}`
+    return function (instance, td, row, col, prop, value, cellProperties) {
+      const rowColKey = `${row}-${col}`
       if (renderedCellCache.current.has(rowColKey)) {
         td.innerHTML = renderedCellCache.current.get(rowColKey)!.innerHTML;
       }
@@ -140,7 +140,7 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
             <Renderer instance={instance}
                       td={td}
                       row={row}
-                      column={column}
+                      col={col}
                       prop={prop}
                       value={value}
                       cellProperties={cellProperties}/>

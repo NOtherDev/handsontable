@@ -322,13 +322,10 @@ describe('Dynamic HotColumn configuration changes', () => {
 
         this.state = {
           setup: [
-            <RendererComponent hot-renderer key={'1'}/>,
             <HotColumn title="test title" className="first-column-class-name" key={'2'}>
               <EditorComponent className="editor-className-1" id="editor-id-1" style={{background: 'red'}} hot-editor/>
             </HotColumn>,
-            <HotColumn title="test title 2" key={'3'}>
-              <RendererComponent2 hot-renderer></RendererComponent2>
-            </HotColumn>
+            <HotColumn title="test title 2" key={'3'} renderer={RendererComponent2} />
           ]
         }
       }
@@ -347,6 +344,7 @@ describe('Dynamic HotColumn configuration changes', () => {
                     init={function () {
                       mockElementDimensions(this.rootElement, 300, 300);
                     }}
+                    renderer={(props) => <RendererComponent {...props} key={'1'}/>}
                     ref={hotTableInstanceRef}>
             {this.state.setup}
           </HotTable>
@@ -397,9 +395,7 @@ describe('Dynamic HotColumn configuration changes', () => {
       wrapperComponentInstance.setState({
         setup: [
           <EditorComponent className="editor-className-2" id="editor-id-2" style={{background: 'blue'}} hot-editor key={'1'}/>,
-          <HotColumn title="test title 2" key={'2'}>
-            <RendererComponent2 hot-renderer></RendererComponent2>
-          </HotColumn>,
+          <HotColumn title="test title 2" key={'2'} renderer={RendererComponent2}/>,
           <HotColumn title="test title" className="first-column-class-name" key={'3'} renderer={RendererComponent}/>
         ]
       });

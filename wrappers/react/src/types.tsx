@@ -24,7 +24,7 @@ export interface RendererProps {
   instance: Handsontable.Core,
   td: HTMLTableCellElement,
   row: number,
-  column: number,
+  col: number,
   prop: string | number,
   value: any,
   cellProperties: Handsontable.CellProperties

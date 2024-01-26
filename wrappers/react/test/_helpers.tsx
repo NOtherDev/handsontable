@@ -213,7 +213,7 @@ export const RendererComponent: React.FC<RendererProps> = ({ value }) => (
     </>
 )
 
-export const customNativeRenderer: Handsontable.renderers.BaseRenderer = function ( instance, td, row, col, prop, value, cellProperties) {
+export const customNativeRenderer: Handsontable.renderers.BaseRenderer = function (instance, td, row, col, prop, value, cellProperties) {
   Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, `value: ${value}`, cellProperties]);
   return td;
 }
