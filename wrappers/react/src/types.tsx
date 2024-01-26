@@ -34,7 +34,7 @@ export interface HotRendererProps {
  * Helper type to expose GridSettings/ColumnSettings props with native renderers/editors separately
  *  from component-based render prop.
  */
-type ReplaceRenderersEditors<T extends Omit<Handsontable.GridSettings, 'data'>> = Omit<T, 'renderer'> & {
+type ReplaceRenderersEditors<T extends Pick<Handsontable.GridSettings, 'renderer'>> = Omit<T, 'renderer'> & {
     hotRenderer?: T['renderer'],
     renderer?: React.ComponentType<HotRendererProps>,
 }
