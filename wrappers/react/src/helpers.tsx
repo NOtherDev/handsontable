@@ -21,6 +21,12 @@ export const OBSOLETE_HOTRENDERER_WARNING = 'Providing a component-based rendere
   'Pass your component using `renderer` prop of the `HotTable` or `HotColumn` component instead.';
 
 /**
+ * Warning message for the `hot-editor` obsolete editor passing method.
+ */
+export const OBSOLETE_HOTEDITOR_WARNING = 'Providing a component-based editor using `hot-editor`-annotated component is no longer supported. ' +
+  'Pass your component using `editor` prop of the `HotTable` or `HotColumn` component instead.';
+
+/**
  * Message for the warning thrown if the Handsontable instance has been destroyed.
  */
 export const HOT_DESTROYED_WARNING = 'The Handsontable instance bound to this component was destroyed and cannot be' +
@@ -44,6 +50,18 @@ export const DEFAULT_CLASSNAME = 'hot-wrapper-editor-container';
 export function warn(...args) {
   if (typeof console !== 'undefined') {
     console.warn(...args);
+  }
+}
+
+/**
+ * Detect if `hot-renderer` or `hot-editor` is defined, and if so, throw an incompatibility warning.
+ */
+export function displayObsoleteRenderersEditorsWarning(children: React.ReactNode): void {
+  if (getChildElementByType(children, 'hot-renderer')) {
+    warn(OBSOLETE_HOTRENDERER_WARNING);
+  }
+  if (getChildElementByType(children, 'hot-editor')) {
+    warn(OBSOLETE_HOTEDITOR_WARNING);
   }
 }
 

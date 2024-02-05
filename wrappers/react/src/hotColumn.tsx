@@ -2,10 +2,8 @@ import React, { ReactElement } from 'react';
 import { HotTableProps, HotColumnProps } from './types';
 import {
   createEditorPortal,
-  getChildElementByType,
-  getExtendedEditorElement,
-  OBSOLETE_HOTRENDERER_WARNING,
-  warn
+  displayObsoleteRenderersEditorsWarning,
+  getExtendedEditorElement
 } from './helpers';
 import { SettingsMapper } from './settingsMapper';
 import Handsontable from 'handsontable/base';
@@ -84,15 +82,6 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
     this.context.emitColumnSettings(this.columnSettings, this.props._columnIndex);
   }
 
-  /**
-   * Detect if `hot-renderer` or `hot-editor` is defined, and if so, throw an incompatibility warning.
-   */
-  private displayObsoleteRenderersEditorsWarning(): void {
-    if (getChildElementByType(this.props.children, 'hot-renderer')) {
-      warn(OBSOLETE_HOTRENDERER_WARNING);
-    }
-  }
-
   /*
   ---------------------------------------
   ------- React lifecycle methods -------
@@ -105,7 +94,7 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
   componentDidMount(): void {
     this.createColumnSettings();
     this.emitColumnSettings();
-    this.displayObsoleteRenderersEditorsWarning();
+    displayObsoleteRenderersEditorsWarning(this.props.children);
   }
 
   /**
@@ -114,7 +103,7 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
   componentDidUpdate(): void {
     this.createColumnSettings();
     this.emitColumnSettings();
-    this.displayObsoleteRenderersEditorsWarning();
+    displayObsoleteRenderersEditorsWarning(this.props.children);
   }
 
   /**

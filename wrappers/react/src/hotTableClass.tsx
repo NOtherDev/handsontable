@@ -13,8 +13,7 @@ import {
   getExtendedEditorElement,
   isCSR,
   warn,
-  getChildElementByType,
-  OBSOLETE_HOTRENDERER_WARNING
+  displayObsoleteRenderersEditorsWarning
 } from './helpers';
 import PropTypes from 'prop-types';
 import { HotTableContext } from './hotTableContext'
@@ -213,15 +212,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
   }
 
   /**
-   * Detect if `hot-renderer` or `hot-editor` is defined, and if so, throw an incompatibility warning.
-   */
-  private displayObsoleteRenderersEditorsWarning(): void {
-    if (getChildElementByType(this.props.children, 'hot-renderer')) {
-      warn(OBSOLETE_HOTRENDERER_WARNING);
-    }
-  }
-
-  /**
    * Handsontable's `beforeViewRender` hook callback.
    */
   handsontableBeforeViewRender(): void {
@@ -267,7 +257,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
     (this.hotInstance as any).init();
 
     this.displayAutoSizeWarning(newGlobalSettings);
-    this.displayObsoleteRenderersEditorsWarning();
+    displayObsoleteRenderersEditorsWarning(this.props.children);
   }
 
   /**
@@ -280,7 +270,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
 
     this.updateHot(newGlobalSettings);
     this.displayAutoSizeWarning(newGlobalSettings);
-    this.displayObsoleteRenderersEditorsWarning();
+    displayObsoleteRenderersEditorsWarning(this.props.children);
   }
 
   /**
