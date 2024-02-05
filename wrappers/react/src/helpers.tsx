@@ -72,7 +72,8 @@ export function displayObsoleteRenderersEditorsWarning(children: React.ReactNode
  * @param {String} type Either `'hot-renderer'` or `'hot-editor'`.
  * @returns {Object|null} A child (React node) or `null`, if no child of that type was found.
  */
-export function getChildElementByType(children: React.ReactNode, type: 'hot-renderer' | 'hot-editor'): React.ReactElement | null {
+// TODO(3-hotrenderer-hoteditor): change to find
+function getChildElementByType(children: React.ReactNode, type: 'hot-renderer' | 'hot-editor'): React.ReactElement | null {
   const childrenArray: React.ReactNode[] = React.Children.toArray(children);
   const childrenCount: number = React.Children.count(children);
   let wantedChild: React.ReactNode | null = null;
