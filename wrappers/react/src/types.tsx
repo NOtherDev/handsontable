@@ -1,12 +1,11 @@
 import Handsontable from 'handsontable/base';
 import React from 'react';
-import { ConnectedComponent } from 'react-redux';
-import BaseEditorComponent from "./baseEditorComponent";
+import BaseEditorComponent from './baseEditorComponent'
 
 /**
  * Type of the editor component's ReactElement.
  */
-export type HotEditorElement = React.ReactElement<{}, ConnectedComponent<React.FunctionComponent, any> | any>;
+export type HotEditorElement = React.ReactElement<HotEditorProps, any>;
 
 /**
  * Type of the identifier under which the cached editor components are stored.
