@@ -3,7 +3,7 @@ import Handsontable from 'handsontable/base';
 import { SettingsMapper } from './settingsMapper';
 import { RenderersPortalManager } from './renderersPortalManager';
 import * as packageJson from '../package.json';
-import { HotTableProps, HotEditorElement } from './types';
+import { HotTableProps } from './types';
 import {
   HOT_DESTROYED_WARNING,
   AUTOSIZE_WARNING,
@@ -155,31 +155,19 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
   }
 
   /**
-   * Get the editor element for the entire HotTable instance.
-   *
-   * @param {React.ReactNode} [children] Children of the HotTable instance. Defaults to `this.props.children`.
-   * @returns {React.ReactElement} React editor component element.
-   */
-  getGlobalEditorElement(): HotEditorElement | null {
-    return getExtendedEditorElement(this.props.children, this.context.editorCache);
-  }
-
-  /**
    * Create a new settings object containing the column settings and global editors and renderers.
    *
    * @returns {Handsontable.GridSettings} New global set of settings for Handsontable.
    */
   createNewGlobalSettings(): Handsontable.GridSettings {
     const newSettings = SettingsMapper.getSettings(this.props);
-    const globalEditorNode = this.getGlobalEditorElement();
 
     newSettings.columns = this.context.columnsSettings.length ? this.context.columnsSettings : newSettings.columns;
 
-    if (globalEditorNode) {
-      newSettings.editor = this.context.getEditorClass(globalEditorNode, GLOBAL_EDITOR_SCOPE);
-
+    if (this.props.editor) {
+      newSettings.editor = this.context.getEditorClass(GLOBAL_EDITOR_SCOPE);
     } else {
-      newSettings.editor = this.props.editor || undefined;
+      newSettings.editor = this.props.hotEditor || undefined;
     }
 
     if (this.props.renderer) {
@@ -299,7 +287,8 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
       ));
 
     const containerProps = getContainerAttributesProps(this.props);
-    const editorPortal = createEditorPortal(this.getOwnerDocument(), this.getGlobalEditorElement());
+    const globalEditorElement = getExtendedEditorElement(this.props.editor, this.context.emitEditorInstance)
+    const editorPortal = createEditorPortal(this.getOwnerDocument(), globalEditorElement);
 
     return (
       <React.Fragment>

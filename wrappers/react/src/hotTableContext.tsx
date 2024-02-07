@@ -1,7 +1,7 @@
 import Handsontable from 'handsontable/base';
 import React, { PropsWithChildren, useCallback, useMemo, useRef } from 'react';
 import { EditorScopeIdentifier, HotEditorCache, HotEditorElement, HotEditorProps, HotRendererProps } from './types'
-import { createPortal, getOriginalEditorClass, GLOBAL_EDITOR_SCOPE } from './helpers'
+import { createPortal, GLOBAL_EDITOR_SCOPE } from './helpers'
 import { RenderersPortalManager } from './renderersPortalManager'
 
 export interface HotTableContextImpl {
@@ -25,9 +25,9 @@ export interface HotTableContextImpl {
   readonly emitColumnSettings: (columnSettings: Handsontable.ColumnSettings, columnIndex: number) => void;
 
   /**
-   * Editor cache.
+   * TODO(3-hotrenderer-hoteditor)
    */
-  readonly editorCache: HotEditorCache;
+  readonly emitEditorInstance: (editorInstance: React.Component, editorColumnScope: EditorScopeIdentifier) => void
 
   /**
    * Return a renderer wrapper function for the provided renderer component.
@@ -45,12 +45,11 @@ export interface HotTableContextImpl {
   /**
    * Create a fresh class to be used as an editor, based on the provided editor React element.
    *
-   * @param {React.ReactElement} editorElement React editor component.
    * @param {string|number} [editorColumnScope] The editor scope (column index or a 'global' string). Defaults to
    * 'global'.
    * @returns {Function} A class to be passed to the Handsontable editor settings.
    */
-  readonly getEditorClass: (editorElement: HotEditorElement, editorColumnScope?: EditorScopeIdentifier) => typeof Handsontable.editors.BaseEditor | undefined;
+  readonly getEditorClass: (editorColumnScope?: EditorScopeIdentifier) => typeof Handsontable.editors.BaseEditor | undefined;
 
   /**
    * Set the renderers portal manager ref.
@@ -125,6 +124,11 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const componentRendererColumns = useRef<Map<number | 'global', boolean>>(new Map());
 
   const editorCache = useRef<HotEditorCache>(new Map());
+
+  const emitEditorInstance = useCallback((editorInstance: React.Component, editorColumnScope: EditorScopeIdentifier) => {
+    editorCache.current.set(editorColumnScope ?? GLOBAL_EDITOR_SCOPE, editorInstance);
+  }, []);
+
   const renderedCellCache = useRef<Map<string, HTMLTableCellElement>>(new Map());
   const clearRenderedCellCache = useCallback(() => renderedCellCache.current.clear(), []);
   const portalCacheArray = useRef<React.ReactPortal[]>([]);
@@ -164,9 +168,8 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
     };
   }, []);
 
-  const getEditorClass = useCallback((editorElement: HotEditorElement, editorColumnScope: EditorScopeIdentifier = GLOBAL_EDITOR_SCOPE): typeof Handsontable.editors.BaseEditor | undefined => {
-    const editorClass = getOriginalEditorClass(editorElement);
-    const cachedComponent = editorCache.current.get(editorClass)?.get(editorColumnScope);
+  const getEditorClass = useCallback((editorColumnScope: EditorScopeIdentifier = GLOBAL_EDITOR_SCOPE): typeof Handsontable.editors.BaseEditor | undefined => {
+    const cachedComponent = editorCache.current?.get(editorColumnScope);
 
     if (cachedComponent) {
       return makeEditorClass(cachedComponent);
@@ -191,7 +194,7 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
     componentRendererColumns: componentRendererColumns.current,
     columnsSettings: columnsSettings.current,
     emitColumnSettings: setHotColumnSettings,
-    editorCache: editorCache.current,
+    emitEditorInstance,
     getRendererWrapper,
     clearRenderedCellCache,
     getEditorClass,

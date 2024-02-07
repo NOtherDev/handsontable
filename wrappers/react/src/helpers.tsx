@@ -2,9 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {
   EditorScopeIdentifier,
-  HotEditorCache,
-  HotEditorElement
+  HotEditorElement,
+  HotEditorProps
 } from './types';
+import BaseEditorComponent from './baseEditorComponent'
 
 let bulkComponentContainer = null;
 
@@ -57,53 +58,28 @@ export function warn(...args) {
  * Detect if `hot-renderer` or `hot-editor` is defined, and if so, throw an incompatibility warning.
  */
 export function displayObsoleteRenderersEditorsWarning(children: React.ReactNode): void {
-  if (getChildElementByType(children, 'hot-renderer')) {
+  if (hasChildElementOfType(children, 'hot-renderer')) {
     warn(OBSOLETE_HOTRENDERER_WARNING);
   }
-  if (getChildElementByType(children, 'hot-editor')) {
+  if (hasChildElementOfType(children, 'hot-editor')) {
     warn(OBSOLETE_HOTEDITOR_WARNING);
   }
 }
 
 /**
- * Filter out and return elements of the provided `type` from the `HotColumn` component's children.
+ * Check the existence of elements of the provided `type` from the `HotColumn` component's children.
  *
  * @param {React.ReactNode} children HotTable children array.
  * @param {String} type Either `'hot-renderer'` or `'hot-editor'`.
- * @returns {Object|null} A child (React node) or `null`, if no child of that type was found.
+ * @returns {boolean} `true` if the child of that type was found, `false` otherwise.
  */
-function getChildElementByType(children: React.ReactNode, type: 'hot-renderer' | 'hot-editor'): React.ReactElement | null {
+function hasChildElementOfType(children: React.ReactNode, type: 'hot-renderer' | 'hot-editor'): boolean {
   const childrenArray: React.ReactNode[] = React.Children.toArray(children);
-  const childrenCount: number = React.Children.count(children);
-  let wantedChild: React.ReactNode | null = null;
 
-  if (childrenCount !== 0) {
-    if (childrenCount === 1 && (childrenArray[0] as React.ReactElement).props[type]) {
-      wantedChild = childrenArray[0];
-
-    } else {
-      wantedChild = childrenArray.find((child) => {
+  return childrenArray.some((child) => {
       return (child as React.ReactElement).props[type] !== void 0;
   });
     }
-  }
-
-  return (wantedChild as React.ReactElement) || null;
-}
-
-/**
- * Get the reference to the original editor class.
- *
- * @param {React.ReactElement} editorElement React element of the editor class.
- * @returns {Function} Original class of the editor component.
- */
-export function getOriginalEditorClass(editorElement: HotEditorElement) {
-  if (!editorElement) {
-    return null;
-  }
-
-  return editorElement.type.WrappedComponent ? editorElement.type.WrappedComponent : editorElement.type;
-}
 
 /**
  * Create an editor portal.
@@ -131,33 +107,18 @@ export function createEditorPortal(doc: Document, editorElement: HotEditorElemen
 /**
  * Get an editor element extended with an instance-emitting method.
  *
- * @param {React.ReactNode} children Component children.
- * @param {Map} editorCache Component's editor cache.
+ * @param {React.ComponentType} Editor TODO.
+ * @param {Function} emitEditorInstance TODO.
  * @param {EditorScopeIdentifier} [editorColumnScope] The editor scope (column index or a 'global' string). Defaults to
  * 'global'.
  * @returns {React.ReactElement} An editor element containing the additional methods.
  */
-export function getExtendedEditorElement(children: React.ReactNode, editorCache: HotEditorCache, editorColumnScope: EditorScopeIdentifier = GLOBAL_EDITOR_SCOPE): React.ReactElement | null {
-  const editorElement = getChildElementByType(children, 'hot-editor');
-  const editorClass = getOriginalEditorClass(editorElement);
-
-  if (!editorElement) {
+export function getExtendedEditorElement(Editor: React.ComponentType<HotEditorProps> | undefined, emitEditorInstance: (editor: BaseEditorComponent, column: EditorScopeIdentifier) => void, editorColumnScope: EditorScopeIdentifier = GLOBAL_EDITOR_SCOPE): HotEditorElement {
+  if (!Editor) {
     return null;
   }
 
-  return React.cloneElement(editorElement, {
-    emitEditorInstance: (editorInstance, editorColumnScope) => {
-      if (!editorCache.get(editorClass)) {
-        editorCache.set(editorClass, new Map());
-      }
-
-      const cacheEntry = editorCache.get(editorClass);
-
-      cacheEntry.set(editorColumnScope ?? GLOBAL_EDITOR_SCOPE, editorInstance);
-    },
-    editorColumnScope,
-    isEditor: true
-  } as object);
+  return <Editor _emitEditorInstance={emitEditorInstance} _editorColumnScope={editorColumnScope}/>
 }
 
 /**

@@ -1,13 +1,8 @@
 import React from 'react';
 import Handsontable from 'handsontable/base';
-import { EditorScopeIdentifier, HotEditorProps } from './types';
+import { HotEditorProps } from './types';
 
-interface BaseEditorProps extends HotEditorProps {
-  editorColumnScope?: EditorScopeIdentifier;
-  emitEditorInstance?: (editor: BaseEditorComponent, column: EditorScopeIdentifier) => void,
-}
-
-class BaseEditorComponent<P = {}, S = {}, SS = any> extends React.Component<P & BaseEditorProps, S, SS> implements Handsontable.editors.BaseEditor {
+class BaseEditorComponent<P = {}, S = {}, SS = any> extends React.Component<P & HotEditorProps, S, SS> implements Handsontable.editors.BaseEditor {
   name = 'BaseEditorComponent';
   instance = null;
   row = null;
@@ -22,14 +17,14 @@ class BaseEditorComponent<P = {}, S = {}, SS = any> extends React.Component<P & 
   hot = null;
 
   componentDidMount() {
-    if (this.props.emitEditorInstance) {
-      this.props.emitEditorInstance(this, this.props.editorColumnScope);
+    if (this.props._emitEditorInstance) {
+      this.props._emitEditorInstance(this, this.props._editorColumnScope);
     }
   }
 
   componentDidUpdate() {
-    if (this.props.emitEditorInstance) {
-      this.props.emitEditorInstance(this, this.props.editorColumnScope);
+    if (this.props._emitEditorInstance) {
+      this.props._emitEditorInstance(this, this.props._editorColumnScope);
     }
   }
 
