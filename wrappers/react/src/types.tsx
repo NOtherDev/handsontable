@@ -22,7 +22,7 @@ export type HotEditorCache = Map<Function, Map<EditorScopeIdentifier, React.Comp
  */
 export interface HotRendererProps {
   instance: Handsontable.Core,
-  td: HTMLTableCellElement,
+  TD: HTMLTableCellElement,
   row: number,
   col: number,
   prop: string | number,

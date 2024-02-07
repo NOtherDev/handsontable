@@ -139,7 +139,7 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
       if (TD && !TD.getAttribute('ghost-table')) {
         const rendererElement = (
             <Renderer instance={instance}
-                      td={TD}
+                      TD={TD}
                       row={row}
                       col={col}
                       prop={prop}
