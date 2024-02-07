@@ -7,7 +7,7 @@ import {
   mountComponentWithRef
 } from './_helpers';
 import { BaseEditorComponent } from '../src/baseEditorComponent';
-import { RendererProps } from '../src'
+import { HotRendererProps } from '../src'
 
 describe('React Context', () => {
   it('should be possible to declare a context and use it inside both renderers and editors', async () => {
@@ -32,7 +32,7 @@ describe('React Context', () => {
       }
     }
 
-    class RendererComponent3 extends React.Component<RendererProps> {
+    class RendererComponent3 extends React.Component<HotRendererProps> {
       render() {
         return (
           <>

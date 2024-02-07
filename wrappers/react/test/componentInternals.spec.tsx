@@ -10,7 +10,7 @@ import {
 } from './_helpers';
 import { HOT_DESTROYED_WARNING } from "../src/helpers";
 import { BaseEditorComponent } from '../src/baseEditorComponent';
-import { RendererProps } from '../src'
+import { HotRendererProps } from '../src'
 
 describe('Subcomponent state', () => {
   it('should be possible to set the state of the renderer components passed to HotTable and HotColumn', async () => {
@@ -144,7 +144,7 @@ describe('Subcomponent state', () => {
 
 describe('Component lifecyle', () => {
   it('renderer components should trigger their lifecycle methods', async () => {
-    class RendererComponent2 extends React.Component<RendererProps, any, any> {
+    class RendererComponent2 extends React.Component<HotRendererProps, any, any> {
       constructor(props) {
         super(props);
 
