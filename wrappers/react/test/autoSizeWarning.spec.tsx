@@ -17,7 +17,6 @@ import {
 
 registerAllModules();
 
-// TODO(3-hotrenderer-hoteditor) remove autosize issue
 describe('`autoRowSize`/`autoColumns` warning', () => {
   it('should recognize whether `autoRowSize` or `autoColumnSize` is enabled and throw a warning, if a global component-based renderer' +
     'is defined (using the default Handsontable settings - autoColumnSize is enabled by default)', async () => {
