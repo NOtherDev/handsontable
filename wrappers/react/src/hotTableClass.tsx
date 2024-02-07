@@ -9,11 +9,11 @@ import {
   AUTOSIZE_WARNING,
   GLOBAL_EDITOR_SCOPE,
   createEditorPortal,
-  getChildElementByType,
   getContainerAttributesProps,
   getExtendedEditorElement,
   isCSR,
-  warn
+  warn,
+  displayObsoleteRenderersWarning
 } from './helpers';
 import PropTypes from 'prop-types';
 import { HotTableContext } from './hotTableContext'
@@ -155,15 +155,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
   }
 
   /**
-   * Get the renderer element for the entire HotTable instance.
-   *
-   * @returns {React.ReactElement} React renderer component element.
-   */
-  getGlobalRendererElement(): React.ReactElement {
-    return getChildElementByType(this.props.children, 'hot-renderer');
-  }
-
-  /**
    * Get the editor element for the entire HotTable instance.
    *
    * @param {React.ReactNode} [children] Children of the HotTable instance. Defaults to `this.props.children`.
@@ -180,7 +171,6 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    */
   createNewGlobalSettings(): Handsontable.GridSettings {
     const newSettings = SettingsMapper.getSettings(this.props);
-    const globalRendererNode = this.getGlobalRendererElement();
     const globalEditorNode = this.getGlobalEditorElement();
 
     newSettings.columns = this.context.columnsSettings.length ? this.context.columnsSettings : newSettings.columns;
@@ -192,12 +182,11 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
       newSettings.editor = this.props.editor || undefined;
     }
 
-    if (globalRendererNode) {
-      newSettings.renderer = this.context.getRendererWrapper(globalRendererNode);
+    if (this.props.renderer) {
+      newSettings.renderer = this.context.getRendererWrapper(this.props.renderer);
       this.context.componentRendererColumns.set('global', true);
-
     } else {
-      newSettings.renderer = this.props.renderer || undefined;
+      newSettings.renderer = this.props.hotRenderer || undefined;
     }
 
     return newSettings;
@@ -268,6 +257,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
     (this.hotInstance as any).init();
 
     this.displayAutoSizeWarning(newGlobalSettings);
+    displayObsoleteRenderersWarning(this.props.children);
   }
 
   /**
@@ -280,6 +270,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
 
     this.updateHot(newGlobalSettings);
     this.displayAutoSizeWarning(newGlobalSettings);
+    displayObsoleteRenderersWarning(this.props.children);
   }
 
   /**
