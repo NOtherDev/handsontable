@@ -21,12 +21,6 @@ export const OBSOLETE_HOTRENDERER_WARNING = 'Providing a component-based rendere
   'Pass your component using `renderer` prop of the `HotTable` or `HotColumn` component instead.';
 
 /**
- * Warning message for the `hot-editor` obsolete editor passing method.
- */
-export const OBSOLETE_HOTEDITOR_WARNING = 'Providing a component-based editor using `hot-editor`-annotated component is no longer supported. ' +
-  'Pass your component using `editor` prop of the `HotTable` or `HotColumn` component instead.';
-
-/**
  * Message for the warning thrown if the Handsontable instance has been destroyed.
  */
 export const HOT_DESTROYED_WARNING = 'The Handsontable instance bound to this component was destroyed and cannot be' +
@@ -54,14 +48,11 @@ export function warn(...args) {
 }
 
 /**
- * Detect if `hot-renderer` or `hot-editor` is defined, and if so, throw an incompatibility warning.
+ * Detect if `hot-renderer` is defined, and if so, throw an incompatibility warning.
  */
-export function displayObsoleteRenderersEditorsWarning(children: React.ReactNode): void {
+export function displayObsoleteRenderersWarning(children: React.ReactNode): void {
   if (getChildElementByType(children, 'hot-renderer')) {
     warn(OBSOLETE_HOTRENDERER_WARNING);
-  }
-  if (getChildElementByType(children, 'hot-editor')) {
-    warn(OBSOLETE_HOTEDITOR_WARNING);
   }
 }
 
@@ -72,7 +63,6 @@ export function displayObsoleteRenderersEditorsWarning(children: React.ReactNode
  * @param {String} type Either `'hot-renderer'` or `'hot-editor'`.
  * @returns {Object|null} A child (React node) or `null`, if no child of that type was found.
  */
-// TODO(3-hotrenderer-hoteditor): change to find
 function getChildElementByType(children: React.ReactNode, type: 'hot-renderer' | 'hot-editor'): React.ReactElement | null {
   const childrenArray: React.ReactNode[] = React.Children.toArray(children);
   const childrenCount: number = React.Children.count(children);
@@ -84,8 +74,8 @@ function getChildElementByType(children: React.ReactNode, type: 'hot-renderer' |
 
     } else {
       wantedChild = childrenArray.find((child) => {
-        return (child as React.ReactElement).props[type] !== void 0;
-      });
+    return (child as React.ReactElement).props[type] !== void 0;
+  });
     }
   }
 

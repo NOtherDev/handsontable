@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react';
 import { HotTableProps, HotColumnProps } from './types';
 import {
   createEditorPortal,
-  displayObsoleteRenderersEditorsWarning,
+  displayObsoleteRenderersWarning,
   getExtendedEditorElement
 } from './helpers';
 import { SettingsMapper } from './settingsMapper';
@@ -94,7 +94,7 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
   componentDidMount(): void {
     this.createColumnSettings();
     this.emitColumnSettings();
-    displayObsoleteRenderersEditorsWarning(this.props.children);
+    displayObsoleteRenderersWarning(this.props.children);
   }
 
   /**
@@ -103,7 +103,7 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
   componentDidUpdate(): void {
     this.createColumnSettings();
     this.emitColumnSettings();
-    displayObsoleteRenderersEditorsWarning(this.props.children);
+    displayObsoleteRenderersWarning(this.props.children);
   }
 
   /**

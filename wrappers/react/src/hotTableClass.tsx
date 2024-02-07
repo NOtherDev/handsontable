@@ -13,7 +13,7 @@ import {
   getExtendedEditorElement,
   isCSR,
   warn,
-  displayObsoleteRenderersEditorsWarning
+  displayObsoleteRenderersWarning
 } from './helpers';
 import PropTypes from 'prop-types';
 import { HotTableContext } from './hotTableContext'
@@ -257,7 +257,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
     (this.hotInstance as any).init();
 
     this.displayAutoSizeWarning(newGlobalSettings);
-    displayObsoleteRenderersEditorsWarning(this.props.children);
+    displayObsoleteRenderersWarning(this.props.children);
   }
 
   /**
@@ -270,7 +270,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
 
     this.updateHot(newGlobalSettings);
     this.displayAutoSizeWarning(newGlobalSettings);
-    displayObsoleteRenderersEditorsWarning(this.props.children);
+    displayObsoleteRenderersWarning(this.props.children);
   }
 
   /**

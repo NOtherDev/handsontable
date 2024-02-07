@@ -1,6 +1,6 @@
 import Handsontable from 'handsontable/base';
 import React, { PropsWithChildren, useCallback, useMemo, useRef } from 'react';
-import { EditorScopeIdentifier, HotEditorCache, HotEditorElement, RendererProps } from './types'
+import { EditorScopeIdentifier, HotEditorCache, HotEditorElement, HotEditorProps, HotRendererProps } from './types'
 import { createPortal, getOriginalEditorClass, GLOBAL_EDITOR_SCOPE } from './helpers'
 import { RenderersPortalManager } from './renderersPortalManager'
 
@@ -32,10 +32,10 @@ export interface HotTableContextImpl {
   /**
    * Return a renderer wrapper function for the provided renderer component.
    *
-   * @param {React.ComponentType<RendererProps>} Renderer React renderer component.
+   * @param {React.ComponentType<HotRendererProps>} Renderer React renderer component.
    * @returns {Handsontable.renderers.Base} The Handsontable rendering function.
    */
-  readonly getRendererWrapper: (Renderer: React.ComponentType<RendererProps>) => typeof Handsontable.renderers.BaseRenderer;
+  readonly getRendererWrapper: (Renderer: React.ComponentType<HotRendererProps>) => typeof Handsontable.renderers.BaseRenderer;
 
   /**
    * Clears rendered cells cache.
@@ -55,7 +55,7 @@ export interface HotTableContextImpl {
   /**
    * Set the renderers portal manager ref.
    *
-   * @param {React.ReactComponent} pmComponent The PortalManager component.
+   * @param {RenderersPortalManager} pmComponent The PortalManager component.
    */
   readonly setRenderersPortalManagerRef: (pmComponent: RenderersPortalManager) => void;
 
@@ -123,12 +123,13 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
   }, [])
 
   const componentRendererColumns = useRef<Map<number | 'global', boolean>>(new Map());
+
   const editorCache = useRef<HotEditorCache>(new Map());
   const renderedCellCache = useRef<Map<string, HTMLTableCellElement>>(new Map());
   const clearRenderedCellCache = useCallback(() => renderedCellCache.current.clear(), []);
   const portalCacheArray = useRef<React.ReactPortal[]>([]);
 
-  const getRendererWrapper = useCallback((Renderer: React.ComponentType<RendererProps>): typeof Handsontable.renderers.BaseRenderer => {
+  const getRendererWrapper = useCallback((Renderer: React.ComponentType<HotRendererProps>): typeof Handsontable.renderers.BaseRenderer => {
     return function (instance, td, row, col, prop, value, cellProperties) {
       const rowColKey = `${row}-${col}`
       if (renderedCellCache.current.has(rowColKey)) {
