@@ -74,7 +74,7 @@ function getChildElementByType(children: React.ReactNode, type: 'hot-renderer' |
 
     } else {
       wantedChild = childrenArray.find((child) => {
-    return (child as React.ReactElement).props[type] !== void 0;
+      return (child as React.ReactElement).props[type] !== void 0;
   });
     }
   }

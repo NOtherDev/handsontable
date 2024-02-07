@@ -130,16 +130,16 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const portalCacheArray = useRef<React.ReactPortal[]>([]);
 
   const getRendererWrapper = useCallback((Renderer: React.ComponentType<HotRendererProps>): typeof Handsontable.renderers.BaseRenderer => {
-    return function (instance, td, row, col, prop, value, cellProperties) {
+    return function (instance, TD, row, col, prop, value, cellProperties) {
       const rowColKey = `${row}-${col}`
       if (renderedCellCache.current.has(rowColKey)) {
-        td.innerHTML = renderedCellCache.current.get(rowColKey)!.innerHTML;
+        TD.innerHTML = renderedCellCache.current.get(rowColKey)!.innerHTML;
       }
 
-      if (td && !td.getAttribute('ghost-table')) {
+      if (TD && !TD.getAttribute('ghost-table')) {
         const rendererElement = (
             <Renderer instance={instance}
-                      td={td}
+                      td={TD}
                       row={row}
                       col={col}
                       prop={prop}
@@ -147,20 +147,20 @@ const HotTableContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
                       cellProperties={cellProperties}/>
         );
 
-        const {portal, portalContainer} = createPortal(rendererElement, `${rowColKey}-${Math.random()}`, td.ownerDocument);
+        const {portal, portalContainer} = createPortal(rendererElement, `${rowColKey}-${Math.random()}`, TD.ownerDocument);
 
-        while (td.firstChild) {
-          td.removeChild(td.firstChild);
+        while (TD.firstChild) {
+          TD.removeChild(TD.firstChild);
         }
 
-        td.appendChild(portalContainer);
+        TD.appendChild(portalContainer);
 
         portalCacheArray.current.push(portal);
       }
 
-      renderedCellCache.current.set(rowColKey, td);
+      renderedCellCache.current.set(rowColKey, TD);
 
-      return td;
+      return TD;
     };
   }, []);
 
