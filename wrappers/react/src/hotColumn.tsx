@@ -2,12 +2,11 @@ import React, { ReactElement } from 'react';
 import { HotTableProps, HotColumnProps } from './types';
 import {
   createEditorPortal,
-  displayObsoleteRenderersEditorsWarning,
-  getExtendedEditorElement
+  displayObsoleteRenderersEditorsWarning
 } from './helpers';
 import { SettingsMapper } from './settingsMapper';
 import Handsontable from 'handsontable/base';
-import { HotTableContext } from './hotTableContext';
+import { HotTableContext, makeEditorClass } from './hotTableContext';
 import { useHotColumnContext } from './hotColumnContext'
 
 const isHotColumn = (childNode: any): childNode is ReactElement => childNode.type === HotColumn;
@@ -21,6 +20,12 @@ interface HotColumnInnerProps extends HotColumnProps {
 
 class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
   columnSettings: Handsontable.ColumnSettings;
+
+  /**
+   * TODO
+   * @private
+   */
+  private localEditorRef = React.createRef<any>(); // TODO type
 
   /**
    * HotTableContext type assignment
@@ -60,7 +65,7 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
     }
 
     if (this.props.editor) {
-      this.columnSettings.editor = this.context.getEditorClass(this.props._columnIndex);
+      this.columnSettings.editor = makeEditorClass(this.localEditorRef);
     } else if (this.props.hotEditor) {
       this.columnSettings.editor = this.props.hotEditor;
     }
@@ -103,8 +108,7 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
    * @returns {React.ReactElement}
    */
   render(): React.ReactElement {
-    const localEditorElement = getExtendedEditorElement(this.props.editor, this.context.emitEditorInstance, this.props._columnIndex);
-    const editorPortal = createEditorPortal(this.props._getOwnerDocument(), localEditorElement);
+    const editorPortal = createEditorPortal(this.props._getOwnerDocument(), this.props.editor, this.localEditorRef);
 
     return (
       <React.Fragment>

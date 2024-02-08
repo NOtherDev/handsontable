@@ -1,11 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  EditorScopeIdentifier,
-  HotEditorElement,
-  HotEditorProps
-} from './types';
-import BaseEditorComponent from './baseEditorComponent'
+import { EditorScopeIdentifier, HotEditorProps } from './types';
 
 let bulkComponentContainer = null;
 
@@ -85,14 +80,16 @@ function hasChildElementOfType(children: React.ReactNode, type: 'hot-renderer' |
  * Create an editor portal.
  *
  * @param {Document} doc Document to be used.
- * @param {React.ReactElement} editorElement Editor's element.
+ * @param {React.ReactElement} Editor Editor's element. TODO.
+ * @param {React.RefObject} ref Editor's ref. TODO.
  * @returns {React.ReactPortal} The portal for the editor.
  */
-export function createEditorPortal(doc: Document, editorElement: HotEditorElement): React.ReactPortal | null {
-  if (typeof doc === 'undefined' || editorElement === null) {
+export function createEditorPortal(doc: Document, Editor: React.ComponentType<HotEditorProps> | undefined, ref: React.RefObject<any>): React.ReactPortal | null {
+  if (typeof doc === 'undefined' || !Editor) {
     return null;
   }
 
+  const editorElement = <Editor ref={ref}/>
   const containerProps = getContainerAttributesProps(editorElement.props, false);
 
   containerProps.className = `${DEFAULT_CLASSNAME} ${containerProps.className}`;
@@ -102,23 +99,6 @@ export function createEditorPortal(doc: Document, editorElement: HotEditorElemen
       {editorElement}
     </div>
     , doc.body);
-}
-
-/**
- * Get an editor element extended with an instance-emitting method.
- *
- * @param {React.ComponentType} Editor TODO.
- * @param {Function} emitEditorInstance TODO.
- * @param {EditorScopeIdentifier} [editorColumnScope] The editor scope (column index or a 'global' string). Defaults to
- * 'global'.
- * @returns {React.ReactElement} An editor element containing the additional methods.
- */
-export function getExtendedEditorElement(Editor: React.ComponentType<HotEditorProps> | undefined, emitEditorInstance: (editor: BaseEditorComponent, column: EditorScopeIdentifier) => void, editorColumnScope: EditorScopeIdentifier = GLOBAL_EDITOR_SCOPE): HotEditorElement {
-  if (!Editor) {
-    return null;
-  }
-
-  return <Editor _emitEditorInstance={emitEditorInstance} _editorColumnScope={editorColumnScope}/>
 }
 
 /**

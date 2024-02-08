@@ -7,16 +7,14 @@ import { HotTableProps } from './types';
 import {
   HOT_DESTROYED_WARNING,
   AUTOSIZE_WARNING,
-  GLOBAL_EDITOR_SCOPE,
   createEditorPortal,
   getContainerAttributesProps,
-  getExtendedEditorElement,
   isCSR,
   warn,
   displayObsoleteRenderersEditorsWarning
 } from './helpers';
 import PropTypes from 'prop-types';
-import { HotTableContext } from './hotTableContext'
+import { HotTableContext, makeEditorClass } from './hotTableContext'
 import { isHotColumn } from './hotColumn'
 import { HotColumnContextProvider } from './hotColumnContext'
 
@@ -74,6 +72,12 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    * @type {React.CSSProperties}
    */
   style: React.CSSProperties;
+
+  /**
+   * TODO
+   * @private
+   */
+  private globalEditorRef = React.createRef<any>(); // TODO type
 
   /**
    * Package version getter.
@@ -165,7 +169,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
     newSettings.columns = this.context.columnsSettings.length ? this.context.columnsSettings : newSettings.columns;
 
     if (this.props.editor) {
-      newSettings.editor = this.context.getEditorClass(GLOBAL_EDITOR_SCOPE);
+      newSettings.editor = makeEditorClass(this.globalEditorRef);
     } else {
       newSettings.editor = this.props.hotEditor || undefined;
     }
@@ -287,8 +291,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
       ));
 
     const containerProps = getContainerAttributesProps(this.props);
-    const globalEditorElement = getExtendedEditorElement(this.props.editor, this.context.emitEditorInstance)
-    const editorPortal = createEditorPortal(this.getOwnerDocument(), globalEditorElement);
+    const editorPortal = createEditorPortal(this.getOwnerDocument(), this.props.editor, this.globalEditorRef);
 
     return (
       <React.Fragment>

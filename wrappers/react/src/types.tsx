@@ -1,6 +1,5 @@
 import Handsontable from 'handsontable/base';
 import React from 'react';
-import BaseEditorComponent from './baseEditorComponent'
 
 /**
  * Type of the editor component's ReactElement.
@@ -10,12 +9,7 @@ export type HotEditorElement = React.ReactElement<HotEditorProps, any>;
 /**
  * Type of the identifier under which the cached editor components are stored.
  */
-export type EditorScopeIdentifier = 'global' | number;
-
-/**
- * Type of the cache map for the Handsontable editor components.
- */
-export type HotEditorCache = Map<EditorScopeIdentifier, React.Component>;
+export type EditorScopeIdentifier = 'global' | number; // tODO needed?
 
 /**
  * Interface for the props of the component-based renderers.
@@ -34,12 +28,11 @@ export interface HotRendererProps {
  * Interface for the props of the component-based editors.
  */
 export interface HotEditorProps {
-  id?: string,
-  className?: string,
-  style?: React.CSSProperties,
+  // id?: string,
+  // className?: string,
+  // style?: React.CSSProperties,
 
-  _editorColumnScope?: EditorScopeIdentifier,
-  _emitEditorInstance?: (editor: BaseEditorComponent, column: EditorScopeIdentifier) => void,
+  ref: React.RefObject<any> // tODO type
 }
 
 /**
