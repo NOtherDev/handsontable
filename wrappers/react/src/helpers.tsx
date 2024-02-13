@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EditorScopeIdentifier, HotEditorProps } from './types';
+import { HotEditorHooks, HotTableProps } from './types';
 
 let bulkComponentContainer = null;
 
@@ -27,11 +27,6 @@ export const OBSOLETE_HOTEDITOR_WARNING = 'Providing a component-based editor us
  */
 export const HOT_DESTROYED_WARNING = 'The Handsontable instance bound to this component was destroyed and cannot be' +
   ' used properly.';
-
-/**
- * String identifier for the global-scoped editor components.
- */
-export const GLOBAL_EDITOR_SCOPE: EditorScopeIdentifier = 'global';
 
 /**
  * Default classname given to the wrapper container.
@@ -74,22 +69,30 @@ function hasChildElementOfType(children: React.ReactNode, type: 'hot-renderer' |
   return childrenArray.some((child) => {
       return (child as React.ReactElement).props[type] !== void 0;
   });
-    }
+}
 
 /**
  * Create an editor portal.
  *
  * @param {Document} doc Document to be used.
- * @param {React.ReactElement} Editor Editor's element. TODO.
- * @param {React.RefObject} ref Editor's ref. TODO.
+ * @param {React.ReactElement | } editorComponent Editor component or render function.
+ * @param {React.RefObject} ref Reference to be filled by the Editor component pointing to overridden hooks object.
  * @returns {React.ReactPortal} The portal for the editor.
  */
-export function createEditorPortal(doc: Document, Editor: React.ComponentType<HotEditorProps> | undefined, ref: React.RefObject<any>): React.ReactPortal | null {
-  if (typeof doc === 'undefined' || !Editor) {
+export function createEditorPortal(doc: Document, editorComponent: HotTableProps['editor'] | undefined, ref: React.RefObject<HotEditorHooks>): React.ReactPortal | null {
+  if (typeof doc === 'undefined' || !editorComponent) {
     return null;
   }
 
-  const editorElement = <Editor ref={ref}/>
+  let Editor: React.ForwardRefExoticComponent<React.RefAttributes<HotEditorHooks>>;
+
+  if (typeof editorComponent === 'function') {
+    Editor = React.forwardRef(editorComponent as React.ForwardRefRenderFunction<HotEditorHooks>);
+  } else {
+    Editor = editorComponent as React.ForwardRefExoticComponent<React.RefAttributes<HotEditorHooks>>;
+  }
+
+  const editorElement = <Editor ref={ref} />;
   const containerProps = getContainerAttributesProps(editorElement.props, false);
 
   containerProps.className = `${DEFAULT_CLASSNAME} ${containerProps.className}`;
@@ -154,4 +157,25 @@ export function getContainerAttributesProps(props, randomizeId: boolean = true):
  */
 export function isCSR(): boolean {
   return typeof window !== 'undefined';
+}
+
+/**
+ * Creates a copy of the class instance that is still bound to this but allows calling its super (prototype) methods.
+ *
+ * @param {T} that An instance to look for prototype methods.
+ * @returns {T} Copy of the instance with super methods access.
+ */
+export function superBound<T>(that: T): T {
+  const proto = Object.getPrototypeOf(Object.getPrototypeOf(that));
+  const superBoundObj = {} as T;
+
+  Object.getOwnPropertyNames(proto).forEach((key) => {
+    if (typeof proto[key] === 'function') {
+      superBoundObj[key] = proto[key].bind(that);
+    } else {
+      superBoundObj[key] = proto[key];
+    }
+  })
+
+  return superBoundObj;
 }

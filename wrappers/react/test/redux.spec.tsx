@@ -13,6 +13,7 @@ import {
   EditorComponent,
   mountComponent
 } from './_helpers';
+import {HotRendererProps} from "../src";
 
 const initialReduxStoreState = {
   hexColor: '#fff'
@@ -53,7 +54,8 @@ describe('Using Redux store within HotTable renderers and editors', () => {
       {
         forwardRef: true
       })(RendererComponent);
-    let rendererInstances = new Map();
+
+    const rendererInstances = new Map();
 
     mountComponent((
       <Provider store={reduxStore}>
@@ -69,19 +71,17 @@ describe('Using Redux store within HotTable renderers and editors', () => {
                   init={function () {
                     mockElementDimensions(this.rootElement, 300, 300);
                   }}
-                  renderer={(props) => <ReduxEnabledRenderer {...props} ref={function (instance) {
-                    if (instance === null) {
-                      return instance;
-                    }
-
-                    rendererInstances.set(`${instance.props.row}-${instance.props.col}`, instance);
+                  renderer={(props) => <ReduxEnabledRenderer {...props} tap={(props) => {
+                    rendererInstances.set(`${props.row}-${props.col}`, props);
                   }
                   } />} />
       </Provider>
     ));
 
-    rendererInstances.forEach((component, key, map) => {
-      expect(component.props.bgColor).toEqual('#fff');
+    expect(rendererInstances.size).not.toEqual(0);
+
+    rendererInstances.forEach((props) => {
+      expect(props.bgColor).toEqual('#fff');
     });
 
     await act(async () => {
@@ -91,8 +91,8 @@ describe('Using Redux store within HotTable renderers and editors', () => {
       });
     });
 
-    rendererInstances.forEach((component, key, map) => {
-      expect(component.props.bgColor).toEqual('#B57267');
+    rendererInstances.forEach((props) => {
+      expect(props.bgColor).toEqual('#B57267');
     });
   });
 
@@ -108,7 +108,8 @@ describe('Using Redux store within HotTable renderers and editors', () => {
       {
         forwardRef: true
       })(EditorComponent);
-    let editorInstances = new Map();
+
+    const editorInstances = new Map();
 
     mountComponent((
       <Provider store={reduxStore}>
@@ -121,23 +122,20 @@ describe('Using Redux store within HotTable renderers and editors', () => {
                   colWidths={50}
                   init={function () {
                     mockElementDimensions(this.rootElement, 300, 300);
-                  }}>
-          <ReduxEnabledEditor ref={function (instance) {
-            if (instance === null) {
-              return instance;
-            }
-
-            editorInstances.set(`${instance.props.row}-${instance.props.col}`, instance);
-          }
-          } hot-editor/>
-        </HotTable>
+                  }}
+                  editor={(_, ref) => <ReduxEnabledEditor ref={ref} tap={(props) => {
+                    editorInstances.set(`${props.row}-${props.col}`, props);
+                  }
+                  } />} />
       </Provider>
     ));
 
     await sleep(100);
 
-    editorInstances.forEach((value, key, map) => {
-      expect(value.props.bgColor).toEqual('#fff');
+    expect(editorInstances.size).not.toEqual(0);
+
+    editorInstances.forEach((props) => {
+      expect(props.bgColor).toEqual('#fff');
     });
 
     await act(async () => {
@@ -147,8 +145,8 @@ describe('Using Redux store within HotTable renderers and editors', () => {
       });
     });
 
-    editorInstances.forEach((value, key, map) => {
-      expect(value.props.bgColor).toEqual('#B57267');
+    editorInstances.forEach((props) => {
+      expect(props.bgColor).toEqual('#B57267');
     });
   });
 });

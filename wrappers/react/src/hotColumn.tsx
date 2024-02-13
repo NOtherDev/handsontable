@@ -1,13 +1,14 @@
 import React, { ReactElement } from 'react';
-import { HotTableProps, HotColumnProps } from './types';
+import { HotTableProps, HotColumnProps, HotEditorHooks } from './types';
 import {
   createEditorPortal,
   displayObsoleteRenderersEditorsWarning
 } from './helpers';
 import { SettingsMapper } from './settingsMapper';
 import Handsontable from 'handsontable/base';
-import { HotTableContext, makeEditorClass } from './hotTableContext';
+import { HotTableContext } from './hotTableContext';
 import { useHotColumnContext } from './hotColumnContext'
+import { EditorContextProvider, makeEditorClass } from "./hotEditor";
 
 const isHotColumn = (childNode: any): childNode is ReactElement => childNode.type === HotColumn;
 
@@ -22,10 +23,16 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
   columnSettings: Handsontable.ColumnSettings;
 
   /**
-   * TODO
+   * Reference to component-based editor overridden hooks object.
    * @private
    */
-  private localEditorRef = React.createRef<any>(); // TODO type
+  private localEditorRef = React.createRef<HotEditorHooks>();
+
+  /**
+   * Reference to HOT-native custom editor class instance.
+   * @private
+   */
+  private localEditorClassInstance = React.createRef<Handsontable.editors.BaseEditor>();
 
   /**
    * HotTableContext type assignment
@@ -65,7 +72,7 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
     }
 
     if (this.props.editor) {
-      this.columnSettings.editor = makeEditorClass(this.localEditorRef);
+      this.columnSettings.editor = makeEditorClass(this.localEditorRef.current, this.localEditorClassInstance);
     } else if (this.props.hotEditor) {
       this.columnSettings.editor = this.props.hotEditor;
     }
@@ -111,9 +118,9 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
     const editorPortal = createEditorPortal(this.props._getOwnerDocument(), this.props.editor, this.localEditorRef);
 
     return (
-      <React.Fragment>
+      <EditorContextProvider classInstanceRef={this.localEditorClassInstance}>
         {editorPortal}
-      </React.Fragment>
+      </EditorContextProvider>
     )
   }
 }

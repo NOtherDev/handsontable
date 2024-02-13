@@ -2,14 +2,9 @@ import Handsontable from 'handsontable/base';
 import React from 'react';
 
 /**
- * Type of the editor component's ReactElement.
+ * Type of the identifier under which the cached components are stored.
  */
-export type HotEditorElement = React.ReactElement<HotEditorProps, any>;
-
-/**
- * Type of the identifier under which the cached editor components are stored.
- */
-export type EditorScopeIdentifier = 'global' | number; // tODO needed?
+export type ScopeIdentifier = 'global' | number;
 
 /**
  * Interface for the props of the component-based renderers.
@@ -25,15 +20,9 @@ export interface HotRendererProps {
 }
 
 /**
- * Interface for the props of the component-based editors.
+ * Interface for component-based editor overridden hooks object.
  */
-export interface HotEditorProps {
-  // id?: string,
-  // className?: string,
-  // style?: React.CSSProperties,
-
-  ref: React.RefObject<any> // tODO type
-}
+export type HotEditorHooks = Partial<Handsontable.editors.BaseEditor> & { hotCustomEditorInstance?: Handsontable.editors.BaseEditor };
 
 /**
  * Helper type to expose GridSettings/ColumnSettings props with native renderers/editors separately
@@ -43,7 +32,7 @@ type ReplaceRenderersEditors<T extends Pick<Handsontable.GridSettings, 'renderer
   hotRenderer?: T['renderer'],
   renderer?: React.ComponentType<HotRendererProps>,
   hotEditor?: T['editor'],
-  editor?: React.ComponentType<HotEditorProps>,
+  editor?: React.ForwardRefExoticComponent<React.RefAttributes<HotEditorHooks>> | React.ForwardRefRenderFunction<HotEditorHooks>,
 }
 
 /**

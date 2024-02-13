@@ -1,10 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import Handsontable from 'handsontable';
 import { act } from '@testing-library/react';
 import { HotTable } from '../src/hotTable';
-import { BaseEditorComponent } from '../src/baseEditorComponent';
 import { HotRendererProps } from '../src/types'
+import { hotEditor, useHotEditorHooks } from "../src/hotEditor";
 
 const SPEC = {
   container: null,
@@ -49,6 +49,14 @@ export function mountComponentWithRef(Component, strictMode = true) {
   });
 
   return hotTableComponent.current;
+}
+
+export function renderComponentWithProps<P>(ComponentType: React.ComponentType<P>, props: P, strictMode = true) {
+  act(() => {
+    SPEC.root.render(
+      strictMode ? <React.StrictMode><ComponentType {...props} /></React.StrictMode> : <ComponentType {...props} />
+    );
+  });
 }
 
 export function mountComponent(Component) {
@@ -207,64 +215,89 @@ class IndividualPropsWrapper extends React.Component<{ref?: string, id?: string}
 
 export { IndividualPropsWrapper };
 
-export const RendererComponent: React.FC<HotRendererProps> = ({ value }) => (
-    <>
-      value: {value}
-    </>
-)
+export const RendererComponent: React.FC<HotRendererProps & { tap?: (props: HotRendererProps) => void }> = ({ tap, ...props }) => {
+  tap?.(props);
+
+  return (
+      <>
+        value: {props.value}
+      </>
+  );
+}
 
 export const customNativeRenderer: Handsontable.renderers.BaseRenderer = function (instance, td, row, col, prop, value, cellProperties) {
   Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, `value: ${value}`, cellProperties]);
   return td;
 }
 
-export class EditorComponent extends BaseEditorComponent<{}, {value?: any}> {
-  mainElementRef: any;
-  containerStyle: any;
+interface EditorComponentProps {
+  className?: string
+  background?: string
+  tap?: (props: EditorComponentProps) => void
+}
 
-  constructor(props) {
-    super(props);
+export const EditorComponent = hotEditor<EditorComponentProps>(({ tap, ...props }, ref) => {
+  const mainElementRef = useRef<HTMLDivElement>(null)
+  const containerStyle = {
+    display: 'none'
+  };
 
-    this.mainElementRef = React.createRef();
+  const valueRef = useRef('');
 
-    this.state = {
-      value: ''
-    };
+  const hotCustomEditorInstanceRef = useHotEditorHooks(ref, (superBoundEditorInstanceProvider) => ({
+    getValue() {
+      return valueRef.current;
+    },
 
-    this.containerStyle = {
-      display: 'none'
-    };
+    setValue(value) {
+      valueRef.current = value;
+    },
+
+    prepare(row, col, prop, TD, originalValue, cellProperties): any {
+      superBoundEditorInstanceProvider().prepare(row, col, prop, TD, originalValue, cellProperties)
+      mainElementRef.current.style.backgroundColor = props.background;
+    },
+
+    open() {
+      mainElementRef.current.style.display = 'block';
+    },
+
+    close() {
+      mainElementRef.current.style.display = 'none';
+    }
+  }), [valueRef]);
+
+  const setNewValue = useCallback(() => {
+    valueRef.current = 'new-value';
+    hotCustomEditorInstanceRef.current.finishEditing();
+  }, [valueRef, hotCustomEditorInstanceRef]);
+
+  tap?.(props);
+
+  return (
+    <div style={containerStyle} ref={mainElementRef} id="editorComponentContainer" className={props.className}>
+      <button onClick={setNewValue}></button>
+    </div>
+  );
+});
+
+export class CustomNativeEditor extends Handsontable.editors.BaseEditor {
+  init() {
+    this.TEXTAREA = document.createElement('TEXTAREA');
+    this.TEXTAREA_PARENT = document.createElement('DIV');
+
+    this.TEXTAREA_PARENT.appendChild(this.TEXTAREA);
+    this.hot.rootElement.appendChild(this.TEXTAREA_PARENT);
   }
-
   getValue() {
-    return this.state.value;
+    return `--${this.TEXTAREA.value}--`;
   }
-
-  setValue(value, callback) {
-    this.setState((state, props) => {
-      return {value: value};
-    }, callback);
+  setValue(value) {
+    this.TEXTAREA.value = value;
   }
-
-  setNewValue() {
-    this.setValue('new-value', () => {
-      this.finishEditing();
-    })
-  }
-
-  open() {
-    this.mainElementRef.current.style.display = 'block';
-  }
-
-  close() {
-    this.mainElementRef.current.style.display = 'none';
-  }
-
-  render(): React.ReactElement<string> {
-    return (
-      <div style={this.containerStyle} ref={this.mainElementRef} id="editorComponentContainer">
-        <button onClick={this.setNewValue.bind(this)}></button>
-      </div>
-    );
+  open() {}
+  close() {}
+  focus() {
+    this.TEXTAREA.focus();
   }
 }
