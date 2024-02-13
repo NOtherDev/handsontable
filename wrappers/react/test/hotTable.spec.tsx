@@ -14,10 +14,10 @@ import {
   simulateKeyboardEvent,
   simulateMouseEvent,
   mountComponentWithRef,
-  customNativeRenderer, CustomNativeEditor
+  customNativeRenderer,
+  CustomNativeEditor
 } from './_helpers';
-import {OBSOLETE_HOTEDITOR_WARNING, OBSOLETE_HOTRENDERER_WARNING} from '../src/helpers'
-import {HotColumn} from "../src";
+import { OBSOLETE_HOTEDITOR_WARNING, OBSOLETE_HOTRENDERER_WARNING } from '../src/helpers'
 
 // register Handsontable's modules
 registerAllModules();

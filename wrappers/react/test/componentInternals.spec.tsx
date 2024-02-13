@@ -127,7 +127,7 @@ describe('Component lifecyle', () => {
         mockElementDimensions(this.rootElement, 300, 300);
       },
       editor: (props, ref) => <EditorComponent2 {...props} key={Math.random()} ref={ref}/>
-    }
+    };
 
     renderComponentWithProps(HotTable, props, false);
 

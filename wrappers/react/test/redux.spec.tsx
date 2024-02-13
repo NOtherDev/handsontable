@@ -2,9 +2,7 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { createStore, combineReducers } from 'redux';
 import { Provider, connect } from 'react-redux';
-import {
-  HotTable
-} from '../src/hotTable';
+import { HotTable } from '../src/hotTable';
 import {
   createSpreadsheetData,
   mockElementDimensions,
@@ -13,7 +11,6 @@ import {
   EditorComponent,
   mountComponent
 } from './_helpers';
-import {HotRendererProps} from "../src";
 
 const initialReduxStoreState = {
   hexColor: '#fff'

@@ -52,7 +52,7 @@ export function makeEditorClass(hooks: HotEditorHooks, instanceRef: React.Mutabl
 /**
  * Context to provide Handsontable-native custom editor class instance to overridden hooks object.
  */
-const EditorContext = React.createContext<React.RefObject<Handsontable.editors.BaseEditor>>(undefined)
+const EditorContext = React.createContext<React.RefObject<Handsontable.editors.BaseEditor>>(undefined);
 
 interface EditorContextProviderProps {
   classInstanceRef: React.RefObject<Handsontable.editors.BaseEditor>
