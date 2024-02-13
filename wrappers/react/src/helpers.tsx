@@ -75,11 +75,11 @@ function hasChildElementOfType(children: React.ReactNode, type: 'hot-renderer' |
  * Create an editor portal.
  *
  * @param {Document} doc Document to be used.
- * @param {React.ReactElement | } editorComponent Editor component or render function.
- * @param {React.RefObject} ref Reference to be filled by the Editor component pointing to overridden hooks object.
+ * @param {React.ForwardRefExoticComponent | React.ForwardRefRenderFunction} editorComponent Editor component or render function.
+ * @param {React.RefObject} hooksReference Reference to be filled by the Editor component pointing to overridden hooks object.
  * @returns {React.ReactPortal} The portal for the editor.
  */
-export function createEditorPortal(doc: Document, editorComponent: HotTableProps['editor'] | undefined, ref: React.RefObject<HotEditorHooks>): React.ReactPortal | null {
+export function createEditorPortal(doc: Document, editorComponent: HotTableProps['editor'] | undefined, hooksReference: React.RefObject<HotEditorHooks>): React.ReactPortal | null {
   if (typeof doc === 'undefined' || !editorComponent) {
     return null;
   }
@@ -92,7 +92,7 @@ export function createEditorPortal(doc: Document, editorComponent: HotTableProps
     Editor = editorComponent as React.ForwardRefExoticComponent<React.RefAttributes<HotEditorHooks>>;
   }
 
-  const editorElement = <Editor ref={ref} />;
+  const editorElement = <Editor ref={hooksReference} />;
   const containerProps = getContainerAttributesProps(editorElement.props, false);
 
   containerProps.className = `${DEFAULT_CLASSNAME} ${containerProps.className}`;

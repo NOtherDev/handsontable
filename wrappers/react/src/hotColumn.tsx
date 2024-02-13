@@ -26,7 +26,7 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
    * Reference to component-based editor overridden hooks object.
    * @private
    */
-  private localEditorRef = React.createRef<HotEditorHooks>();
+  private localEditorHooksRef = React.createRef<HotEditorHooks>();
 
   /**
    * Reference to HOT-native custom editor class instance.
@@ -72,7 +72,7 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
     }
 
     if (this.props.editor) {
-      this.columnSettings.editor = makeEditorClass(this.localEditorRef.current, this.localEditorClassInstance);
+      this.columnSettings.editor = makeEditorClass(this.localEditorHooksRef.current, this.localEditorClassInstance);
     } else if (this.props.hotEditor) {
       this.columnSettings.editor = this.props.hotEditor;
     }
@@ -115,7 +115,7 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
    * @returns {React.ReactElement}
    */
   render(): React.ReactElement {
-    const editorPortal = createEditorPortal(this.props._getOwnerDocument(), this.props.editor, this.localEditorRef);
+    const editorPortal = createEditorPortal(this.props._getOwnerDocument(), this.props.editor, this.localEditorHooksRef);
 
     return (
       <EditorContextProvider classInstanceRef={this.localEditorClassInstance}>

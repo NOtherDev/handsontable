@@ -78,7 +78,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
    * Reference to component-based editor overridden hooks object.
    * @private
    */
-  private globalEditorRef = React.createRef<HotEditorHooks>();
+  private globalEditorHooksRef = React.createRef<HotEditorHooks>();
 
   /**
    * Reference to HOT-native custom editor class instance.
@@ -183,7 +183,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
     }
 
     if (this.props.editor) {
-      newSettings.editor = makeEditorClass(this.globalEditorRef.current, this.globalEditorClassInstance);
+      newSettings.editor = makeEditorClass(this.globalEditorHooksRef.current, this.globalEditorClassInstance);
     } else {
       newSettings.editor = this.props.hotEditor || undefined;
     }
@@ -298,7 +298,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
       ));
 
     const containerProps = getContainerAttributesProps(this.props);
-    const editorPortal = createEditorPortal(this.getOwnerDocument(), this.props.editor, this.globalEditorRef);
+    const editorPortal = createEditorPortal(this.getOwnerDocument(), this.props.editor, this.globalEditorHooksRef);
 
     return (
       <React.Fragment>
