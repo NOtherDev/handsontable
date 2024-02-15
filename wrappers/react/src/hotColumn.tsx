@@ -72,7 +72,7 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
     }
 
     if (this.props.editor) {
-      this.columnSettings.editor = makeEditorClass(this.localEditorHooksRef.current, this.localEditorClassInstance);
+      this.columnSettings.editor = makeEditorClass(this.localEditorHooksRef, this.localEditorClassInstance);
     } else if (this.props.hotEditor) {
       this.columnSettings.editor = this.props.hotEditor;
     }

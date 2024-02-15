@@ -183,7 +183,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
     }
 
     if (this.props.editor) {
-      newSettings.editor = makeEditorClass(this.globalEditorHooksRef.current, this.globalEditorClassInstance);
+      newSettings.editor = makeEditorClass(this.globalEditorHooksRef, this.globalEditorClassInstance);
     } else {
       newSettings.editor = this.props.hotEditor || undefined;
     }
