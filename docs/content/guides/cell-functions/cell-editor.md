@@ -155,6 +155,7 @@ export const ExampleComponent = () => {
       autoWrapCol={true}
       licenseKey="non-commercial-and-evaluation"
     >
+      {/* add the `editor` prop to set the component as a Handsontable editor */}
       <HotColumn width={250} editor={EditorComponent} />
     </HotTable>
   );
