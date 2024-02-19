@@ -298,7 +298,7 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
       ));
 
     const containerProps = getContainerAttributesProps(this.props);
-    const editorPortal = createEditorPortal(this.getOwnerDocument(), this.props.editor, this.globalEditorHooksRef);
+    const editorPortal = createEditorPortal(this.getOwnerDocument(), this.props.editor);
 
     return (
       <React.Fragment>
@@ -306,7 +306,8 @@ class HotTableClass extends React.Component<HotTableProps, {}> {
           {hotColumnWrapped}
         </div>
         <RenderersPortalManager ref={this.context.setRenderersPortalManagerRef} />
-        <EditorContextProvider classInstanceRef={this.globalEditorClassInstance}>
+        <EditorContextProvider hooksRef={this.globalEditorHooksRef}
+                               hotCustomEditorInstanceRef={this.globalEditorClassInstance}>
           {editorPortal}
         </EditorContextProvider>
       </React.Fragment>

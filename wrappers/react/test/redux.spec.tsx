@@ -120,7 +120,7 @@ describe('Using Redux store within HotTable renderers and editors', () => {
                   init={function () {
                     mockElementDimensions(this.rootElement, 300, 300);
                   }}
-                  editor={(_, ref) => <ReduxEnabledEditor ref={ref} tap={(props) => {
+                  editor={() => <ReduxEnabledEditor tap={(props) => {
                     editorInstances.set(`${props.row}-${props.col}`, props);
                   }
                   } />} />

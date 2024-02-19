@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { HotEditorHooks, HotTableProps } from './types';
+import { HotTableProps } from './types';
 
 let bulkComponentContainer = null;
 
@@ -75,24 +75,15 @@ function hasChildElementOfType(children: React.ReactNode, type: 'hot-renderer' |
  * Create an editor portal.
  *
  * @param {Document} doc Document to be used.
- * @param {React.ForwardRefExoticComponent | React.ForwardRefRenderFunction} editorComponent Editor component or render function.
- * @param {React.RefObject} hooksReference Reference to be filled by the Editor component pointing to overridden hooks object.
+ * @param {React.ComponentType} Editor Editor component or render function.
  * @returns {React.ReactPortal} The portal for the editor.
  */
-export function createEditorPortal(doc: Document, editorComponent: HotTableProps['editor'] | undefined, hooksReference: React.RefObject<HotEditorHooks>): React.ReactPortal | null {
-  if (typeof doc === 'undefined' || !editorComponent) {
+export function createEditorPortal(doc: Document, Editor: HotTableProps['editor'] | undefined): React.ReactPortal | null {
+  if (typeof doc === 'undefined' || !Editor) {
     return null;
   }
 
-  let Editor: React.ForwardRefExoticComponent<React.RefAttributes<HotEditorHooks>>;
-
-  if (typeof editorComponent === 'function') {
-    Editor = React.forwardRef(editorComponent as React.ForwardRefRenderFunction<HotEditorHooks>);
-  } else {
-    Editor = editorComponent as React.ForwardRefExoticComponent<React.RefAttributes<HotEditorHooks>>;
-  }
-
-  const editorElement = <Editor ref={hooksReference} />;
+  const editorElement = <Editor />;
   const containerProps = getContainerAttributesProps(editorElement.props, false);
 
   containerProps.className = `${DEFAULT_CLASSNAME} ${containerProps.className}`;

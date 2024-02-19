@@ -256,7 +256,7 @@ describe('Editor configuration using React components', () => {
                   mockElementDimensions(this.rootElement, 300, 300);
                 }}>
         <HotColumn/>
-        <HotColumn editor={(props, ref) => <EditorComponent {...props} ref={ref} />} />
+        <HotColumn editor={(props) => <EditorComponent {...props} />} />
       </HotTable>
     )).hotInstance;
 
@@ -327,8 +327,8 @@ describe('Editor configuration using React components', () => {
                 init={function () {
                   mockElementDimensions(this.rootElement, 300, 300);
                 }}>
-        <HotColumn editor={(props, ref) => <EditorComponent background='red' {...props} ref={ref} />} />
-        <HotColumn editor={(props, ref) => <EditorComponent background='yellow' {...props} ref={ref} />} />
+        <HotColumn editor={(props) => <EditorComponent background='red' {...props} />} />
+        <HotColumn editor={(props) => <EditorComponent background='yellow' {...props} />} />
       </HotTable>
     )).hotInstance;
 
@@ -397,7 +397,7 @@ describe('Dynamic HotColumn configuration changes', () => {
         this.state = {
           setup: [
             <HotColumn title="test title" className="first-column-class-name" key={'2'}
-                       editor={(_, ref) => <EditorComponent className="editor-className-1" background='red' ref={ref} />} />,
+                       editor={() => <EditorComponent className="editor-className-1" background='red' />} />,
             <HotColumn title="test title 2" key={'3'} renderer={RendererComponent2} />
           ]
         }
@@ -464,7 +464,7 @@ describe('Dynamic HotColumn configuration changes', () => {
 
     await act(async() => {
       wrapperComponentInstance.setState({
-        globalEditor: (_, ref) => <EditorComponent className="editor-className-2" background='blue' key={'1'} ref={ref} />,
+        globalEditor: () => <EditorComponent className="editor-className-2" background='blue' key={'1'} />,
         setup: [
           <HotColumn title="test title 2" key={'2'} renderer={RendererComponent2}/>,
           <HotColumn title="test title" className="first-column-class-name" key={'3'} renderer={RendererComponent}/>

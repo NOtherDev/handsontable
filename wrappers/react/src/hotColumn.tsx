@@ -115,10 +115,11 @@ class HotColumnInner extends React.Component<HotColumnInnerProps, {}> {
    * @returns {React.ReactElement}
    */
   render(): React.ReactElement {
-    const editorPortal = createEditorPortal(this.props._getOwnerDocument(), this.props.editor, this.localEditorHooksRef);
+    const editorPortal = createEditorPortal(this.props._getOwnerDocument(), this.props.editor);
 
     return (
-      <EditorContextProvider classInstanceRef={this.localEditorClassInstance}>
+      <EditorContextProvider hooksRef={this.localEditorHooksRef}
+                             hotCustomEditorInstanceRef={this.localEditorClassInstance}>
         {editorPortal}
       </EditorContextProvider>
     )

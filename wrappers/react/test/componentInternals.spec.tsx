@@ -101,7 +101,7 @@ describe('Component lifecyle', () => {
       willUnmount: 0
     };
 
-    const EditorComponent2 = hotEditor((_, ref) => {
+    const EditorComponent2 = () => {
       useEffect(() => {
         editorCounters.didMount++;
 
@@ -113,7 +113,7 @@ describe('Component lifecyle', () => {
       return (
         <>test</>
       );
-    });
+    };
 
     const props: HotTableProps = {
       licenseKey: "non-commercial-and-evaluation",
@@ -126,7 +126,7 @@ describe('Component lifecyle', () => {
       init: function () {
         mockElementDimensions(this.rootElement, 300, 300);
       },
-      editor: (props, ref) => <EditorComponent2 {...props} key={Math.random()} ref={ref}/>
+      editor: (props) => <EditorComponent2 {...props} key={Math.random()} />
     };
 
     renderComponentWithProps(HotTable, props, false);

@@ -21,7 +21,7 @@ describe('React Context', () => {
       );
     }
 
-    const EditorComponent2 = hotEditor<{ className: string }>(({ className }, ref) => {
+    const EditorComponent2 = ({ className }) => {
       return (
         <div className={className}>
           <TestContext.Consumer>
@@ -29,7 +29,7 @@ describe('React Context', () => {
           </TestContext.Consumer>
         </div>
       );
-    })
+    }
 
     class RendererComponent3 extends React.Component<HotRendererProps> {
       render() {
@@ -73,9 +73,9 @@ describe('React Context', () => {
                     hotTableInstance = instance;
                   }}>
           <HotColumn renderer={RendererComponent2}
-                     editor={(_, ref) => <EditorComponent2 className="ec2" ref={ref} />} />
+                     editor={() => <EditorComponent2 className="ec2" />} />
           <HotColumn renderer={RendererComponent3}
-                     editor={(_, ref) => <EditorComponent3 className="ec3" ref={ref} />} />
+                     editor={() => <EditorComponent3 className="ec3" />} />
         </HotTable>
       </TestContext.Provider>
     ));

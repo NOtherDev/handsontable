@@ -4,7 +4,7 @@ import Handsontable from 'handsontable';
 import { act } from '@testing-library/react';
 import { HotTable } from '../src/hotTable';
 import { HotRendererProps } from '../src/types'
-import { hotEditor, useHotEditorHooks } from "../src/hotEditor";
+import { useHotEditor } from "../src/hotEditor";
 
 const SPEC = {
   container: null,
@@ -236,7 +236,7 @@ interface EditorComponentProps {
   tap?: (props: EditorComponentProps) => void
 }
 
-export const EditorComponent = hotEditor<EditorComponentProps>(({ tap, ...props }, ref) => {
+export const EditorComponent: React.FC<EditorComponentProps> = ({ tap, ...props }) => {
   const mainElementRef = useRef<HTMLDivElement>(null)
   const containerStyle = {
     display: 'none'
@@ -244,7 +244,7 @@ export const EditorComponent = hotEditor<EditorComponentProps>(({ tap, ...props 
 
   const valueRef = useRef('');
 
-  const hotCustomEditorInstanceRef = useHotEditorHooks(ref, (superBoundEditorInstanceProvider) => ({
+  const hotCustomEditorInstanceRef = useHotEditor((runSuper) => ({
     getValue() {
       return valueRef.current;
     },
@@ -254,7 +254,7 @@ export const EditorComponent = hotEditor<EditorComponentProps>(({ tap, ...props 
     },
 
     prepare(row, col, prop, TD, originalValue, cellProperties): any {
-      superBoundEditorInstanceProvider().prepare(row, col, prop, TD, originalValue, cellProperties)
+      runSuper().prepare(row, col, prop, TD, originalValue, cellProperties)
       mainElementRef.current.style.backgroundColor = props.background;
     },
 
@@ -270,7 +270,7 @@ export const EditorComponent = hotEditor<EditorComponentProps>(({ tap, ...props 
   const setNewValue = useCallback(() => {
     valueRef.current = 'new-value';
     hotCustomEditorInstanceRef.current.finishEditing();
-  }, [valueRef, hotCustomEditorInstanceRef]);
+  }, [valueRef, mainElementRef]);
 
   tap?.(props);
 
@@ -279,7 +279,7 @@ export const EditorComponent = hotEditor<EditorComponentProps>(({ tap, ...props 
       <button onClick={setNewValue}></button>
     </div>
   );
-});
+};
 
 export class CustomNativeEditor extends Handsontable.editors.BaseEditor {
   init() {

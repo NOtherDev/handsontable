@@ -351,7 +351,7 @@ describe('Editor configuration using React components', () => {
                 init={function () {
                   mockElementDimensions(this.rootElement, 300, 300);
                 }}
-                editor={(_, ref) => <EditorComponent ref={ref} /> } />
+                editor={() => <EditorComponent /> } />
     )).hotInstance;
 
     expect((document.querySelector('#editorComponentContainer') as any).style.display).toEqual('none');

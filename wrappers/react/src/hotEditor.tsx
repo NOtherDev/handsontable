@@ -49,48 +49,46 @@ export function makeEditorClass(hooksRef: React.MutableRefObject<HotEditorHooks>
   }
 }
 
+interface EditorContextType {
+  hooksRef: React.Ref<HotEditorHooks>
+  hotCustomEditorInstanceRef: React.RefObject<Handsontable.editors.BaseEditor>
+}
+
 /**
  * Context to provide Handsontable-native custom editor class instance to overridden hooks object.
  */
-const EditorContext = React.createContext<React.RefObject<Handsontable.editors.BaseEditor>>(undefined);
+const EditorContext = React.createContext<EditorContextType | undefined>(undefined);
 
 interface EditorContextProviderProps {
-  classInstanceRef: React.RefObject<Handsontable.editors.BaseEditor>
+  hooksRef: React.Ref<HotEditorHooks>
+  hotCustomEditorInstanceRef: React.RefObject<Handsontable.editors.BaseEditor>
   children: React.ReactNode
 }
 
 /**
- * Provider of the context that exposes Handsontable-native editor instance for custom editor components.
+ * Provider of the context that exposes Handsontable-native editor instance and passes hooks object
+ * for custom editor components.
  *
- * @param {React.RefObject} classInstanceRef  Reference to Handsontable-native editor instance.
+ * @param {React.Ref} hooksRef Reference for component-based editor overridden hooks object.
+ * @param {React.RefObject} hotCustomEditorInstanceRef  Reference to Handsontable-native editor instance.
  */
-export const EditorContextProvider: React.FC<EditorContextProviderProps> = ({ classInstanceRef, children }) => {
-  return <EditorContext.Provider value={classInstanceRef}>
+export const EditorContextProvider: React.FC<EditorContextProviderProps> = ({ hooksRef, hotCustomEditorInstanceRef, children }) => {
+  return <EditorContext.Provider value={{ hooksRef, hotCustomEditorInstanceRef }}>
     {children}
   </EditorContext.Provider>
 }
 
 /**
- * Helper function that wraps React.ForwardRef for ease of creating custom component-based editors.
- *
- * @param {Function} render The editor component function.
- */
-export function hotEditor<P>(render: React.ForwardRefRenderFunction<HotEditorHooks, P>) {
-  return React.forwardRef<HotEditorHooks, P>(render);
-}
-
-/**
  * Hook that allows encapsulating custom behaviours of component-based editor by customizing passed ref with overridden hooks object.
  *
- * @param {React.Ref} ref Reference for component-based editor overridden hooks object.
  * @param {Function} overriddenHooks Function that provides the overrides specific for the custom editor.
  *  It gets an object that emulates super calls to BaseEditor methods, if needed.
  * @param {React.DependencyList} deps Overridden hooks object React dependency list.
  * @returns {React.RefObject} Reference to Handsontable-native editor instance.
  */
-export function useHotEditorHooks(ref: React.Ref<HotEditorHooks>, overriddenHooks?: (superBoundEditorInstanceProvider: () => Handsontable.editors.BaseEditor) => HotEditorHooks, deps?: React.DependencyList): React.RefObject<Handsontable.editors.BaseEditor> {
-  const hotCustomEditorInstanceRef = React.useContext(EditorContext);
+export function useHotEditor(overriddenHooks?: (runSuper: () => Handsontable.editors.BaseEditor) => HotEditorHooks, deps?: React.DependencyList): React.RefObject<Handsontable.editors.BaseEditor> {
+  const { hooksRef, hotCustomEditorInstanceRef } = React.useContext(EditorContext);
   const superBoundEditorInstanceProvider = () => superBound(hotCustomEditorInstanceRef.current);
-  React.useImperativeHandle(ref, () => overriddenHooks?.(superBoundEditorInstanceProvider) || {}, deps);
+  React.useImperativeHandle(hooksRef, () => overriddenHooks?.(superBoundEditorInstanceProvider) || {}, deps);
   return hotCustomEditorInstanceRef;
 }
