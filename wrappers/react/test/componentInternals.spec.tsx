@@ -10,7 +10,7 @@ import {
   sleep,
 } from './_helpers';
 import { HOT_DESTROYED_WARNING } from "../src/helpers";
-import { hotEditor, HotTableProps, HotRendererProps } from '../src'
+import { HotTableProps, HotRendererProps } from '../src'
 
 describe('Component lifecyle', () => {
   it('renderer components should trigger their lifecycle methods', async () => {
