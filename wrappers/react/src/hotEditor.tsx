@@ -88,7 +88,7 @@ export const EditorContextProvider: React.FC<EditorContextProviderProps> = ({ ho
  */
 export function useHotEditor(overriddenHooks?: (runSuper: () => Handsontable.editors.BaseEditor) => HotEditorHooks, deps?: React.DependencyList): React.RefObject<Handsontable.editors.BaseEditor> {
   const { hooksRef, hotCustomEditorInstanceRef } = React.useContext(EditorContext);
-  const superBoundEditorInstanceProvider = () => superBound(hotCustomEditorInstanceRef.current);
-  React.useImperativeHandle(hooksRef, () => overriddenHooks?.(superBoundEditorInstanceProvider) || {}, deps);
+  const runSuper = () => superBound(hotCustomEditorInstanceRef.current);
+  React.useImperativeHandle(hooksRef, () => overriddenHooks?.(runSuper) || {}, deps);
   return hotCustomEditorInstanceRef;
 }

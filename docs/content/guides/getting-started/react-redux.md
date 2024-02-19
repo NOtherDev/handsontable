@@ -190,7 +190,7 @@ import { HexColorPicker } from 'react-colorful';
 import StarRatingComponent from 'react-star-rating-component';
 import { Provider, connect } from 'react-redux';
 import { createStore, combineReducers } from 'redux';
-import { HotTable, HotColumn, hotEditor, useHotEditorHooks } from '@handsontable/react';
+import { HotTable, HotColumn, useHotEditor } from '@handsontable/react';
 import { registerAllModules } from 'handsontable/registry';
 import 'handsontable/dist/handsontable.full.min.css';
 
@@ -198,7 +198,7 @@ import 'handsontable/dist/handsontable.full.min.css';
 registerAllModules();
 
 // a custom editor component
-const UnconnectedColorPicker = hotEditor((props, ref) => {
+const UnconnectedColorPicker = (props) => {
   const editorRef = React.useRef(null);
 
   const editorContainerStyle = {
@@ -218,7 +218,7 @@ const UnconnectedColorPicker = hotEditor((props, ref) => {
     e.stopPropagation();
   }, []);
 
-  const hotCustomEditorInstanceRef = useHotEditorHooks(ref, (superBoundEditorInstanceProvider) => {
+  const hotCustomEditorInstanceRef = useHotEditor((runSuper) => {
     setValue(value) {
       valueRef.current = value;
     },
@@ -236,7 +236,7 @@ const UnconnectedColorPicker = hotEditor((props, ref) => {
     },
 
     prepare(row, col, prop, td, originalValue, cellProperties) {
-      superBoundEditorInstanceProvider().prepare(row, col, prop, td, originalValue, cellProperties);
+      runSuper().prepare(row, col, prop, td, originalValue, cellProperties);
 
       const tdPosition = td.getBoundingClientRect();
 
@@ -303,7 +303,7 @@ const UnconnectedColorPicker = hotEditor((props, ref) => {
   }
 
   return <>{renderResult}</>;
-});
+};
 
 const ColorPicker = connect(function(state) {
   return {
@@ -426,10 +426,10 @@ export const ExampleComponent = () => {
         {/* add the `renderer` and `editor` props to set the component as a Handsontable renderer and editor */}
         <HotColumn width={150} 
                    renderer={(props) => <ColorPicker {...props} isRenderer />} 
-                   editor={(props, ref) => <ColorPicker {...props} isEditor ref={ref} />} />
+                   editor={(props) => <ColorPicker {...props} isEditor />} />
         <HotColumn width={150} 
                    renderer={(props) => <ColorPicker {...props} isRenderer />} 
-                   editor={(props, ref) => <ColorPicker {...props} isEditor ref={ref} />} />
+                   editor={(props) => <ColorPicker {...props} isEditor />} />
       </HotTable>
     </Provider>
   );

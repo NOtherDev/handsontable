@@ -28,7 +28,7 @@ This tutorial will give you a comprehensive understanding of how the whole proce
 
 ## Component-based editors
 
-You can use React components to create custom editors. To do so, you'll need to create a component that provides a set of Handsontable's editor class functions that you need to override with your custom behaviors. The component can be created using `hotEditor` helper function and use `useHotEditorHooks` hook that takes the `ref` provided by `hotEditor` and expects an object with the overridden methods. Both `hotEditor` and `useHotEditorHooks` are exported from `@handsontable/react`.
+You can use React components to create custom editors. To do so, you'll need to create a component that provides a set of Handsontable's editor class functions that you need to override with your custom behaviors using `useHotEditor` hook that is exported from `@handsontable/react`.
 
 This will give you a solid base to build on. Note that the editor component needs to tick all of the boxes that a regular editor does, such as defining the `getValue`, `setValue`, `open`, `close`, and `focus` methods, which are abstract in the `BaseEditor`. For more info, check the section on [creating custom editors from scratch](#how-to-create-a-custom-editor).
 
@@ -43,11 +43,11 @@ Note that in case of React 16 and older, it wouldn't work out of the box because
 
 ```jsx
 import React from 'react';
-import { HotTable, HotColumn, hotEditor, useHotEditorHooks } from '@handsontable/react';
+import { HotTable, HotColumn, useHotEditor } from '@handsontable/react';
 import 'handsontable/dist/handsontable.full.min.css';
 
-// An editor component. Note it receives the forwarded ref along with the custom props you might want to use.
-const EditorComponent = hotEditor((props, ref) => {
+// An editor component. 
+const EditorComponent = (props) => {
   const mainElementRef = React.useRef();
   const containerStyle = {
     display: 'none',
@@ -64,10 +64,10 @@ const EditorComponent = hotEditor((props, ref) => {
   // without waiting for the next component rerender.
   const valueRef = React.useRef('');
 
-  // A hook that takes the forwarded ref and a factory function that provides the set of methods
+  // A hook that takes a factory function that provides the set of methods
   // from BaseEditor that your custom editor needs to override. It also provides the editor instance
   // reference in case other functions need to access its methods, like `finishEditing`.
-  const hotCustomEditorInstanceRef = useHotEditorHooks(ref, (superBoundEditorInstanceProvider) => ({
+  const hotCustomEditorInstanceRef = useHotEditor((runSuper) => ({
     setValue(value) {
       valueRef.current = value;
     },
@@ -89,7 +89,7 @@ const EditorComponent = hotEditor((props, ref) => {
       // the editor instance base class, as it provides
       // the component with the information needed to use the editor
       // (hotInstance, row, col, prop, TD, originalValue, cellProperties)
-      superBoundEditorInstanceProvider().prepare(row, col, prop, td, originalValue, cellProperties);
+      runSuper().prepare(row, col, prop, td, originalValue, cellProperties);
 
       const tdPosition = td.getBoundingClientRect();
 
@@ -134,7 +134,7 @@ const EditorComponent = hotEditor((props, ref) => {
         </button>
       </div>
   );
-});
+};
 
 const data = [
     ['Obrien Fischer'],
